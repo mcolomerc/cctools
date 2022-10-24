@@ -7,15 +7,12 @@ import (
 	"io/ioutil"
 	"mcolomerc/cc-tools/pkg/config"
 	"net/http"
-
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 type CCloudAdmin struct {
-	KafkaConfig *kafka.ConfigMap
-	Cfg         config.Config
-	ClusterUrl  string
-	Bearer      string
+	Cfg        config.Config
+	ClusterUrl string
+	Bearer     string
 }
 
 func New(cfg config.Config) (*CCloudAdmin, error) {
@@ -26,13 +23,6 @@ func New(cfg config.Config) (*CCloudAdmin, error) {
 		Cfg:        cfg,
 		Bearer:     bearer,
 		ClusterUrl: clusterUrl,
-		KafkaConfig: &kafka.ConfigMap{
-			"bootstrap.servers": cfg.BootstrapServer,
-			"security.protocol": "SASL_SSL",
-			"sasl.mechanisms":   "PLAIN",
-			"sasl.username":     cfg.ApiKey, //"KW5Z6VM5J7RWOAXD",
-			"sasl.password":     cfg.ApiSecret,
-		},
 	}, nil
 }
 
