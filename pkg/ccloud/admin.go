@@ -121,7 +121,7 @@ func (admin *CCloudAdmin) buildRequest(requestURL string) ([]interface{}, error)
 		return nil, err
 	}
 
-	fmt.Printf("\n response code: %d\n", res.StatusCode)
+	// fmt.Printf("\n response code: %d\n", res.StatusCode)
 
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {

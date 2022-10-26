@@ -1,7 +1,6 @@
 package export
 
 import (
-	"fmt"
 	"mcolomerc/cc-tools/pkg/ccloud"
 	"mcolomerc/cc-tools/pkg/config"
 	"strconv"
@@ -9,7 +8,9 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func ExportToExcel(topics []ccloud.Topic, config config.Config) {
+type ExcelExporter struct{}
+
+func (e ExcelExporter) ExportTopics(topics []ccloud.Topic, config config.Config) error {
 	f := excelize.NewFile()
 
 	// Create a new sheet.
@@ -30,9 +31,10 @@ func ExportToExcel(topics []ccloud.Topic, config config.Config) {
 	f.SetActiveSheet(index)
 	f.Sheet.Delete("Sheet1")
 	// Save spreadsheet by the given path.
-	if err := f.SaveAs(config.Cluster + "_Topics.xlsx"); err != nil {
-		fmt.Println(err)
+	if err := f.SaveAs(config.Export.Output + "/" + config.Cluster + "_Topics.xlsx"); err != nil {
+		return err
 	}
+	return nil
 }
 
 func getConfigs(configs []ccloud.TopicConfig) string {

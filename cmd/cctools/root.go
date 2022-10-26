@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/export"
 	"os"
 
 	"github.com/go-playground/validator/v10"
@@ -14,6 +15,8 @@ import (
 var version = "0.0.1"
 var cfgFile string
 var toolsConfig config.Config
+
+var exportExecutors []export.Export
 
 var rootCmd = &cobra.Command{
 	Use:     "cct",
@@ -55,6 +58,27 @@ func initConfig() {
 	validate := validator.New()
 	if err := validate.Struct(&toolsConfig); err != nil {
 		log.Fatalf("Missing required attributes %v\n", err)
+	}
+
+	for _, v := range toolsConfig.Export.Exporters {
+		if v == config.Excel {
+			exportExecutors = append(exportExecutors, &export.ExcelExporter{})
+		}
+		if v == config.Json {
+			exportExecutors = append(exportExecutors, &export.JsonExporter{})
+		}
+		if v == config.Yaml {
+			exportExecutors = append(exportExecutors, &export.YamlExporter{})
+		}
+	}
+
+	if _, err := os.Stat(toolsConfig.Export.Output); os.IsNotExist(err) {
+		log.Printf("Export output directory: %s not found. Creating...", toolsConfig.Export.Output)
+		err := os.Mkdir(toolsConfig.Export.Output, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Export output directory: %s - %v", toolsConfig.Export.Output, err)
+			os.Exit(1)
+		}
 	}
 
 }
