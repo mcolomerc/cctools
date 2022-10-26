@@ -30,20 +30,22 @@ Export Topic information:
 
 ```cctools export --config config.yml```
 
-#### Exporters
-
-```cctools export``` supports different exporters by configuration.
+#### Output
 
 Configure the output folder, it will be created if it does not exist. 
 
-- Example: All the export files will be stored into the ```output``` folder (it will be created if necessary).
+Example: All the export files will be stored into the ```output``` folder (it will be created if necessary).
   
 ```yaml
 export: 
   output: output 
 ```
 
-- Example: Use the following configuration to export to YAML format only:
+#### Exporters
+
+```cctools export``` supports different exporters by configuration.
+
+Example: Use the following configuration to export to YAML format only:
 
 ```yaml
 export:
@@ -51,7 +53,7 @@ export:
   - yaml  
 ```
 
-- Example: Use the following configuration to export to Excel, YAML and JSON formats: 
+Example: Use the following configuration to export to Excel, YAML and JSON formats: 
 
 ```yaml
 export:
