@@ -1,19 +1,31 @@
 
-# Confluent Cloud Tools
+# Confluent Migration Tools
 
-Command Line Tools for Confluent, provides extra features not included in [Confluent CLI](https://docs.confluent.io/confluent-cli/current/overview.html).
+Command Line Tools for helping on migrations to Confluent Cloud or Confluent Platform.
+ 
 
 ## Configuration
 
 Configuration file: ```--config config.yml```
 
-```yaml
-environment: <CCLOUD_ENVIRONMENT_ID>
-cluster: <CCLOUD_CLUSTER_ID>
-bootstrapServer: <CCLOUD_BOOTSTRAP_SERVER>    
-ccloudUrl: <CCLOUD_CLUSTER_REST_URL>
-apiKey: <CCLOUD_API_KEY>
-apiSecret: <CCLOUD_API_SECRET>
+```yaml 
+#cluster id
+cluster: <CLUSTER_ID>
+#bootstrap server
+bootstrapServer: <BOOTSTRAP_SERVER> 
+#REST endpint 
+endpointUrl: <REST_ENDPOINT>
+#Credentials
+credentials: 
+  key: <USER> # or CCloud API_KEY 
+  secret: <PASSWORD> # or CCloud API_SECRET  
+  # Certificates - Confluent Platform 
+  certificates: 
+    certFile: <CERT file path>  
+    keyFile: <KEY file path>  
+    CAFile: <CA File path>
+ccloud:
+  environment: <ENVIRONMENT_ID>  
 export:
   exporters: 
   - excel

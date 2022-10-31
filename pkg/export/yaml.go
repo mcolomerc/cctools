@@ -2,23 +2,21 @@ package export
 
 import (
 	"io/ioutil"
-	"mcolomerc/cc-tools/pkg/ccloud"
-	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/model"
 
 	"gopkg.in/yaml.v2"
 )
 
 type YamlExporter struct{}
 
-func (e YamlExporter) ExportTopics(topics []ccloud.Topic, config config.Config) error {
+func (e YamlExporter) ExportTopics(topics []model.Topic, outputPath string) error {
 
 	yamlData, err := yaml.Marshal(&topics)
-
 	if err != nil {
 		return err
 	}
 
-	fileName := config.Export.Output + "/" + config.Cluster + "_Topics.yaml"
+	fileName := outputPath + "_Topics.yaml"
 	err = ioutil.WriteFile(fileName, yamlData, 0644)
 	if err != nil {
 		return err

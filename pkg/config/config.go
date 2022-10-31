@@ -1,20 +1,36 @@
 package config
 
 type Config struct {
-	Cluster         string `yaml:"cluster" validate:"required"`
-	BootstrapServer string `yaml:"bootstrapServer" validate:"required"`
-	Environment     string `yaml:"environment" validate:"required"`
-	ApiKey          string `yaml:"apiKey" validate:"required"`
-	ApiSecret       string `yaml:"apiSecret" validate:"required"`
-	CCloudUrl       string `yaml:"ccloudUrl" validate:"required"`
-	Export          Export `yaml:"export"`
-}
-type Export struct {
-	Exporters []Exporter `yaml:"exporters"`
-	Output    string     `yaml:"output"`
+	Cluster         string      `yaml:"cluster" validate:"required"`
+	EndpointUrl     string      `yaml:"endpointUrl" validate:"required"`
+	BootstrapServer string      `yaml:"bootstrapServer" validate:"required"`
+	Credentials     Credentials `yaml:"credentials"`
+	CCloud          CCloud      `yaml:"ccloud" validate:"omitempty"`
+	Export          Export      `yaml:"export"`
 }
 
-//
+type Credentials struct {
+	Key          string       `yaml:"key" validate:"required"`
+	Secret       string       `yaml:"secret" validate:"required"`
+	Certificates Certificates `yaml:"certificates" validate:"omitempty"`
+}
+
+type Certificates struct {
+	CertFile string `yaml:"certFile"`
+	KeyFile  string `yaml:"keyFile"`
+	CAFile   string `yaml:"CAFile"`
+}
+
+type CCloud struct {
+	Environment string `yaml:"environment" validate:"required"`
+}
+
+// Export
+type Export struct {
+	Exporters []Exporter `yaml:"exporters"`
+	Output    string     `yaml:"output" validate:"required"`
+}
+
 type Exporter string
 
 const (

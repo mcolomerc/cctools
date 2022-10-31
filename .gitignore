@@ -1,2 +1,5 @@
 config.yml 
 dist
+environment
+output 
+target

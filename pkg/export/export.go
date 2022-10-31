@@ -1,10 +1,7 @@
 package export
 
-import (
-	"mcolomerc/cc-tools/pkg/ccloud"
-	"mcolomerc/cc-tools/pkg/config"
-)
+import "mcolomerc/cc-tools/pkg/model"
 
-type Export interface {
-	ExportTopics(topics []ccloud.Topic, config config.Config) error
+type Exporter interface {
+	ExportTopics(topics []model.Topic, outputPath string) error
 }

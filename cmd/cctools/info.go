@@ -2,7 +2,6 @@ package cctools
 
 import (
 	"fmt"
-	"mcolomerc/cc-tools/pkg/ccloud"
 	"mcolomerc/cc-tools/pkg/export"
 
 	"github.com/spf13/cobra"
@@ -15,22 +14,24 @@ var inspectCmd = &cobra.Command{
 	Long:    ` Command to export Confluent Cloud cluster information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Export Cluster information command \n")
-		ccClient, _ := ccloud.New(toolsConfig)
-		topics, err := ccClient.GetTopics()
+		topics, err := kafkaService.GetTopics()
+		// log.Printf("Topics %v", topics)
 		if err != nil {
 			fmt.Printf("client: could not get topics: %s\n", err)
 		}
+
+		exportExecutors := toolsConfig.Exporters
+		outputPath := toolsConfig.UserConfig.Export.Output + "/" + toolsConfig.UserConfig.Cluster
 		done := make(chan bool, len(exportExecutors))
 		for _, v := range exportExecutors {
-			go func(v export.Export) {
-				err := v.ExportTopics(topics, toolsConfig)
+			go func(v export.Exporter) {
+				err := v.ExportTopics(topics, outputPath)
 				if err != nil {
 					fmt.Printf("Error: %s\n", err)
 				}
 				done <- true
 			}(v)
 		}
-
 		for i := 0; i < len(exportExecutors); i++ {
 			<-done
 		}
