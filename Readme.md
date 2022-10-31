@@ -27,6 +27,8 @@ credentials:
 ccloud:
   environment: <ENVIRONMENT_ID>  
 export:
+  topics:
+    exclude: _confluent
   exporters: 
   - excel
   - yaml 
@@ -51,6 +53,18 @@ Example: All the export files will be stored into the ```output``` folder (it wi
 ```yaml
 export: 
   output: output 
+```
+
+#### Exclude 
+
+##### Topics
+
+Exclude Topics by name containing ```string``.
+
+```yaml
+export:
+  topics:
+    exclude: _confluent
 ```
 
 #### Exporters

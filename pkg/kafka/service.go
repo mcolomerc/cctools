@@ -6,6 +6,7 @@ import (
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/model"
+	"strings"
 )
 
 type KafkaService struct {
@@ -38,14 +39,15 @@ func (kService *KafkaService) GetTopics() ([]model.Topic, error) {
 			Partitions:        val["partitions_count"],
 			ReplicationFactor: val["replication_factor"],
 		}
-
-		configs, err := kService.GetTopicConfigs(t.Name)
-		if err != nil {
-			log.Printf("client: error getting topic configs : %s\n", err)
-		} else {
-			t.Configs = configs
+		if !kService.checkExclude(t.Name) {
+			configs, err := kService.GetTopicConfigs(t.Name)
+			if err != nil {
+				log.Printf("client: error getting topic configs : %s\n", err)
+			} else {
+				t.Configs = configs
+			}
+			topicList = append(topicList, *t)
 		}
-		topicList = append(topicList, *t)
 	}
 	return topicList, nil
 }
@@ -83,15 +85,11 @@ func (kService *KafkaService) GetConsumerGroups() ([]string, error) {
 	return consumerGroups, nil
 }
 
-/*curl --request GET \
-  --url 'https://pkc-00000.region.provider.confluent.cloud/kafka/v3/clusters/{cluster_id}/consumer-groups/{consumer_group_id}/lags' \
-  --header 'Authorization: Basic REPLACE_BASIC_AUTH'
-
- "https://pkc-00000.region.provider.confluent.cloud/kafka/v3/clusters/cluster-1/topics/topic-1/configs"
-},
-
-https://pkc-00000.region.provider.confluent.cloud/kafka/v3/clusters/cluster-1/topics/topic-1/configs
-
-https://pkc-00000.region.provider.confluent.cloud/kafka/v3/clusters/cluster-1/topics/topic-1/configs
-
-*/
+func (kService *KafkaService) checkExclude(topic string) bool {
+	if kService.Conf.UserConfig.Export.Topics.Exclude != "" {
+		if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Exclude) {
+			return true
+		}
+	}
+	return false
+}
