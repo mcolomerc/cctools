@@ -59,7 +59,7 @@ export:
 
 ##### Topics
 
-Exclude Topics by name containing ```string``.
+Exclude Topics by name containing ```string```.
 
 ```yaml
 export:
