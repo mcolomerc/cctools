@@ -24,6 +24,20 @@ func New(conf config.RuntimeConfig) *KafkaService {
 		ClusterUrl:      fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.UserConfig.EndpointUrl, conf.UserConfig.Cluster),
 	}
 }
+func (kService *KafkaService) Export() (model.ExportResult, error) {
+	var result model.ExportResult
+	var err error
+	for _, v := range kService.Conf.UserConfig.Export.Resources {
+		if v == config.ExportTopics {
+			result.Topics, err = kService.GetTopics()
+			if err != nil {
+				log.Printf("Export: error exporting topics : %s\n", err)
+				return result, err
+			}
+		}
+	}
+	return result, nil
+}
 
 func (kService *KafkaService) GetTopics() ([]model.Topic, error) {
 	topics, err := kService.KafkaRestClient.Get(kService.ClusterUrl + "/topics")

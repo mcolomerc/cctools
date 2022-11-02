@@ -1,7 +1,6 @@
 package config
 
 import (
-	"mcolomerc/cc-tools/pkg/export"
 	"testing"
 )
 
@@ -45,20 +44,9 @@ func TestConfigYaml(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`&ConfigBuilder{}.Build`)
 	}
-	exporters := config.UserConfig.Export.Exporters
-
-	for _, exp := range exporters {
+	for _, exp := range config.UserConfig.Export.Exporters {
 		if exp != Yaml {
 			t.Fatalf(`Got %v, Expected %v`, exp, Yaml)
-		}
-	}
-
-	expRunners := config.Exporters
-
-	for _, expR := range expRunners {
-		_, ok := expR.(export.YamlExporter)
-		if !ok {
-			t.Error("Assertion error")
 		}
 	}
 }
@@ -71,18 +59,10 @@ func TestConfigJson(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`&ConfigBuilder{}.Build`)
 	}
-	exporters := config.UserConfig.Export.Exporters
-	for _, exp := range exporters {
+
+	for _, exp := range config.UserConfig.Export.Exporters {
 		if exp != Json {
 			t.Fatalf(`Got %v, Expected %v`, exp, Yaml)
-		}
-	}
-	expRunners := config.Exporters
-
-	for _, expR := range expRunners {
-		_, ok := expR.(export.JsonExporter)
-		if !ok {
-			t.Error("Assertion error")
 		}
 	}
 }

@@ -27,13 +27,23 @@ type CCloud struct {
 
 // Export
 type Export struct {
-	Topics struct {
-		Exclude string `yaml:"exclude"`
-		Include string `yaml:"include"`
-	} `yaml:"topics"`
+	Resources []Resource `yaml:"resources" validate:"required"`
+	Topics    Topics     `yaml:"topics" validate:"omitempty"`
 	Exporters []Exporter `yaml:"exporters"`
 	Output    string     `yaml:"output" validate:"required"`
 }
+
+type Topics struct {
+	Exclude string `yaml:"exclude"`
+	Include string `yaml:"include"`
+}
+
+type Resource string
+
+const (
+	ExportTopics  Resource = "topics"
+	ExportSchemas Resource = "schemas"
+)
 
 type Exporter string
 

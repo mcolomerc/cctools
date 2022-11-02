@@ -14,8 +14,7 @@ var inspectCmd = &cobra.Command{
 	Long:    ` Command to export Confluent Cloud cluster information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Export Cluster information command \n")
-		topics, err := kafkaService.GetTopics()
-		// log.Printf("Topics %v", topics)
+		exportResult, err := kafkaService.Export()
 		if err != nil {
 			fmt.Printf("client: could not get topics: %s\n", err)
 		}
@@ -25,7 +24,7 @@ var inspectCmd = &cobra.Command{
 		done := make(chan bool, len(exportExecutors))
 		for _, v := range exportExecutors {
 			go func(v export.Exporter) {
-				err := v.ExportTopics(topics, outputPath)
+				err := v.ExportTopics(exportResult.Topics, outputPath)
 				if err != nil {
 					fmt.Printf("Error: %s\n", err)
 				}

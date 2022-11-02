@@ -27,6 +27,8 @@ credentials:
 ccloud:
   environment: <ENVIRONMENT_ID>  
 export:
+  resources:
+    - topics
   topics:
     exclude: _confluent
   exporters: 
@@ -43,6 +45,18 @@ export:
 Export Topic information:
 
 ```cctools export --config config.yml```
+
+####  Resources
+
+Required: Configure resources to export.
+
+* Export Topics including Topic configuration: ```topics```
+
+```yaml
+export:  
+  resources: 
+    - topics
+```
 
 #### Output
 
