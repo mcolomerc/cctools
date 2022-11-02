@@ -214,7 +214,7 @@ https://goreleaser.com/install/
 
 ### Binary
 
-Mac/OS:
+MacOS:
 
 ```./dist/cctools_darwin_amd64_v1/cctools export --config config.yml```
 
