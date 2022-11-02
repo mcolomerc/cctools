@@ -3,3 +3,4 @@ dist
 environment
 output 
 target
+.DS_Store
