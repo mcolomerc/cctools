@@ -67,6 +67,49 @@ export:
     exclude: _confluent
 ```
 
+#### Include
+
+##### Topics
+
+Include only Topics by name containing ```string```.
+
+```yaml
+export:
+  topics: 
+    include: _confluent
+```
+
+#### Exclude & Include
+
+```include``` can be used with ```exclude``` rules.  
+
+Example: Exclude all ```_confluent``` topics but include ```_confluent_balancer``` topics.
+
+```yaml
+export:
+  topics:
+    exclude: _confluent
+    include: _confluent_balancer
+```
+
+Export result:  
+
+* *_confluent_balancer_api_state*
+* *_confluent_balancer_broker_samples*
+* *_confluent_balancer_partition_samples*
+* *my-topic*
+
+Consider that ```exclude``` will be applied first, so with the following configuration, ```exclude``` will not take effect since all the ```_confluent``` topics will be included by the ```include```.
+
+```yaml
+export:
+  topics:
+    exclude: _confluent_balancer
+    include: _confluent
+```
+
+---
+
 #### Exporters
 
 ```cctools export``` supports different exporters by configuration.
@@ -142,6 +185,8 @@ Output Sample:
     value: producer
   ...
 ```
+
+---
 
 # Sources
 

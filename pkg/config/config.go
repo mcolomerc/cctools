@@ -29,6 +29,7 @@ type CCloud struct {
 type Export struct {
 	Topics struct {
 		Exclude string `yaml:"exclude"`
+		Include string `yaml:"include"`
 	} `yaml:"topics"`
 	Exporters []Exporter `yaml:"exporters"`
 	Output    string     `yaml:"output" validate:"required"`

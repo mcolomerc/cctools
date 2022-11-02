@@ -88,6 +88,17 @@ func (kService *KafkaService) GetConsumerGroups() ([]string, error) {
 func (kService *KafkaService) checkExclude(topic string) bool {
 	if kService.Conf.UserConfig.Export.Topics.Exclude != "" {
 		if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Exclude) {
+			if kService.Conf.UserConfig.Export.Topics.Include != "" {
+				if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Include) {
+					return false
+				}
+			}
+			return true
+		}
+	} else if kService.Conf.UserConfig.Export.Topics.Include != "" {
+		if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Include) {
+			return false
+		} else {
 			return true
 		}
 	}
