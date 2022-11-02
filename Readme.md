@@ -218,4 +218,9 @@ Mac/OS:
 
 ```./dist/cctools_darwin_amd64_v1/cctools export --config config.yml```
 
- 
+  ### CI/CD
+
+ There are 2 ```github actions``get on the repo:
+
+ 1. ````pr-tag```: Create a tag from every PR on the repo. You need to specify #major/#minor/#patch on the cluster for better version control
+ 2. ```release```: Create a new release from the TAG created by the previous tag. This action in created on top of ```goreleaser``` and will create binaries for all the common distributions. 
