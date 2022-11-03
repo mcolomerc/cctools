@@ -43,23 +43,24 @@ func (e ClinkExporter) buildCreationScript(topics []model.Topic, outputPath stri
 		log.Println("Error creating file ...")
 		return err
 	}
-	_, errw := f.WriteString(SH_HEADER + "\n")
-	if errw != nil {
-		log.Println("Error writing file ...")
-		return errw
-	}
-	_, errw1 := f.WriteString(e.buildLink(outputPath) + "\n")
-	if errw1 != nil {
-		log.Println("Error writing link to file ...")
-		return errw1
-	}
+	var lines []string
+	lines = append(lines, SH_HEADER)
+	lines = append(lines, `echo "Create the Cluster Link"`)
+	lines = append(lines, e.buildLink(outputPath))
+	lines = append(lines, "")
+
 	if !e.AutoCreate {
 		for _, v := range topics {
-			_, errwt := f.WriteString(e.buildTopicMirror(v.Name) + "\n")
-			if errwt != nil {
-				log.Println("Error writing mirror to file ...")
-				return errwt
-			}
+			lines = append(lines, `echo "Create Mirror Topic: `+v.Name+`"`)
+			lines = append(lines, e.buildTopicMirror(v.Name))
+			lines = append(lines, "")
+		}
+	}
+	for _, v := range lines {
+		_, errw := f.WriteString(v + "\n")
+		if errw != nil {
+			log.Println("Error writing file ...")
+			return errw
 		}
 	}
 	f.Sync()
@@ -75,17 +76,21 @@ func (e ClinkExporter) buildPromote(topics []model.Topic, outputPath string, don
 		log.Println("Error creating file ...")
 		return err
 	}
-	_, errw := f.WriteString(SH_HEADER + "\n")
-	if errw != nil {
-		log.Println("Error writing file ...")
-		return errw
-	}
+	var lines []string
+	lines = append(lines, SH_HEADER)
+	lines = append(lines, `echo "Promote mirrors."`)
+	lines = append(lines, "")
 
 	for _, v := range topics {
-		_, errwt := f.WriteString(e.buildPromoteMirror(v.Name) + "\n")
-		if errwt != nil {
-			log.Println("Error writing promote to file ...")
-			return errwt
+		lines = append(lines, `echo "Promote mirror Topic: `+v.Name+`"`)
+		lines = append(lines, e.buildPromoteMirror(v.Name))
+		lines = append(lines, "")
+	}
+	for _, v := range lines {
+		_, errw := f.WriteString(v + "\n")
+		if errw != nil {
+			log.Println("Error writing file ...")
+			return errw
 		}
 	}
 	f.Sync()
@@ -128,17 +133,20 @@ func (e ClinkExporter) buildCleanup(outputPath string, done chan bool) error {
 		log.Println("Error creating file ...")
 		return err
 	}
-	_, errw := f.WriteString(SH_HEADER + "\n")
-	if errw != nil {
-		log.Println("Error writing file ...")
-		return errw
-	}
+	var lines []string
+	lines = append(lines, SH_HEADER)
+	lines = append(lines, `echo "Clean up..."`)
 
 	clean := fmt.Sprintf("confluent kafka link delete %s --cluster %s", e.LinkName, e.DestinationClusterId)
-	_, errw1 := f.WriteString(clean + "\n")
-	if errw1 != nil {
-		log.Println("Error writing file ...")
-		return errw1
+	lines = append(lines, clean)
+	lines = append(lines, "")
+
+	for _, v := range lines {
+		_, errw := f.WriteString(v + "\n")
+		if errw != nil {
+			log.Println("Error writing file ...")
+			return errw
+		}
 	}
 
 	f.Sync()
@@ -156,7 +164,6 @@ func (e ClinkExporter) buildProperties(topics []model.Topic, outputPath string, 
 	}
 	var lines []string
 	autoCreate := fmt.Sprintf("auto.create.mirror.topics.enable=%t ", e.AutoCreate)
-
 	lines = append(lines, autoCreate)
 
 	if e.AutoCreate {
