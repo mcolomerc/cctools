@@ -41,9 +41,23 @@ type Topics struct {
 type Resource string
 
 const (
-	ExportTopics  Resource = "topics"
-	ExportSchemas Resource = "schemas"
+	ExportTopics         Resource = "topics"
+	ExportSchemas        Resource = "schemas"
+	ExportConsumerGroups Resource = "consumer_groups"
 )
+
+func (e Resource) String() string {
+	resources := [...]string{"topics", "schemas", "consumer_groups"}
+
+	x := string(e)
+	for _, v := range resources {
+		if v == x {
+			return x
+		}
+	}
+
+	return ""
+}
 
 type Exporter string
 

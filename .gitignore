@@ -1,4 +1,5 @@
 config.yml 
+config*.yml
 dist
 environment
 output 

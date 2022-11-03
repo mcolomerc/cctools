@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"mcolomerc/cc-tools/pkg/config"
-	"mcolomerc/cc-tools/pkg/kafka"
+
+	"mcolomerc/cc-tools/pkg/services"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -13,7 +14,7 @@ import (
 var version = "0.0.1"
 var cfgFile string
 var toolsConfig config.RuntimeConfig
-var kafkaService kafka.KafkaService
+var exportHandler services.ExportHandler
 
 var rootCmd = &cobra.Command{
 	Use:     "cct",
@@ -34,7 +35,7 @@ func initConfig() {
 		log.Fatalf("Error Reading Config")
 	}
 	toolsConfig = tConfig
-	kafkaService = *kafka.New(toolsConfig)
+	exportHandler = *services.NewExportHandler(toolsConfig)
 }
 
 func Execute() {
