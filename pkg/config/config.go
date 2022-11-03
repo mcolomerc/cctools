@@ -29,6 +29,7 @@ type CCloud struct {
 type Export struct {
 	Resources []Resource `yaml:"resources" validate:"required"`
 	Topics    Topics     `yaml:"topics" validate:"omitempty"`
+	CLink     CLink      `yaml:"clink" validate:"omitempty"`
 	Exporters []Exporter `yaml:"exporters"`
 	Output    string     `yaml:"output" validate:"required"`
 }
@@ -36,6 +37,16 @@ type Export struct {
 type Topics struct {
 	Exclude string `yaml:"exclude"`
 	Include string `yaml:"include"`
+}
+
+type CLink struct {
+	Name        string `yaml:"name"`
+	Destination string `yaml:"destination"`
+	AutoCreate  bool   `yaml:"autocreate"`
+	Sync        struct {
+		Offset bool `yaml:"offset"`
+		Acl    bool `yaml:"acl"`
+	} `yaml:"sync"`
 }
 
 type Resource string
@@ -65,4 +76,5 @@ const (
 	Excel Exporter = "excel"
 	Yaml  Exporter = "yaml"
 	Json  Exporter = "json"
+	Clink Exporter = "clink"
 )

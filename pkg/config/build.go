@@ -83,6 +83,18 @@ func (c ConfigBuilder) buildExporters() []export.Exporter {
 			exporters = append(exporters, &export.JsonExporter{})
 		} else if v == Yaml {
 			exporters = append(exporters, &export.YamlExporter{})
+		} else if v == Clink {
+			exporters = append(exporters, &export.ClinkExporter{
+				LinkName:             c.RuntimeConfig.UserConfig.Export.CLink.Name,
+				SourceClusterId:      c.RuntimeConfig.UserConfig.Cluster,
+				BootstrapServer:      c.RuntimeConfig.UserConfig.BootstrapServer,
+				SourceApiKey:         c.RuntimeConfig.UserConfig.Credentials.Key,
+				SourceApiSecret:      c.RuntimeConfig.UserConfig.Credentials.Secret,
+				DestinationClusterId: c.RuntimeConfig.UserConfig.Export.CLink.Destination,
+				AclSync:              c.RuntimeConfig.UserConfig.Export.CLink.Sync.Acl,
+				OffsetSync:           c.RuntimeConfig.UserConfig.Export.CLink.Sync.Offset,
+				AutoCreate:           c.RuntimeConfig.UserConfig.Export.CLink.AutoCreate,
+			})
 		} else {
 			fmt.Printf("Unrecognized exporter: %v", v)
 		}

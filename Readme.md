@@ -209,6 +209,36 @@ Output Sample for ```topics``` resource:
   ...
 ```
 
+##### ```clink```
+
+From the selected `topics` export [Confluent Cloud Cluster Link](https://docs.confluent.io/cloud/current/multi-cloud/overview.html) scripts and configuration.
+
+Output: The export will generate:
+
+* Cluster Link creation script (.sh), including topic mirrors from selected `topics` if `autocreate` is `false`
+* Topic promotion script (.sh)
+* Clean up script (.sh)
+* Cluster Link configuration file (.properties), including `auto.create.mirror.topics.filters` from selected `topics`
+
+Exporter configuration:
+
+```yaml
+export: 
+  resources: 
+    - topics
+  topics:
+    exclude: connect
+  clink:
+    name: <CLUSTER_LINK_NAME>
+    destination: <DESTINATION_CLUSTER_ID>
+    autocreate: true | false
+    sync: 
+      offset: true | false
+      acl: true | false 
+  exporters:  
+  - clink 
+``` 
+
 ---
 
 # Sources
