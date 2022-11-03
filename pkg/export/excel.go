@@ -9,6 +9,36 @@ import (
 
 type ExcelExporter struct{}
 
+func (e ExcelExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {
+	f := excelize.NewFile()
+
+	// Create a new sheet.
+	index := f.NewSheet("ConsumerGroups")
+	f.SetCellValue("ConsumerGroups", "A1", "ConsumerGroupID")
+	f.SetCellValue("ConsumerGroups", "B1", "PartitionAssignor")
+	f.SetCellValue("ConsumerGroups", "C1", "State")
+	f.SetCellValue("ConsumerGroups", "D1", "Consumers")
+	f.SetCellValue("ConsumerGroups", "E1", "LagSummary")
+	f.SetCellValue("ConsumerGroups", "F1", "Lags")
+
+	for key, value := range cgroups {
+		f.SetCellValue("ConsumerGroups", "A"+strconv.Itoa(key+2), value.ConsumerGroupID)
+		f.SetCellValue("ConsumerGroups", "B"+strconv.Itoa(key+2), value.PartitionsAssignor)
+		f.SetCellValue("ConsumerGroups", "C"+strconv.Itoa(key+2), value.State)
+		f.SetCellValue("ConsumerGroups", "D"+strconv.Itoa(key+2), value.Consumers)
+		f.SetCellValue("ConsumerGroups", "E"+strconv.Itoa(key+2), value.LagSummary)
+		f.SetCellValue("ConsumerGroups", "F"+strconv.Itoa(key+2), value.Lags)
+	}
+
+	f.SetActiveSheet(index)
+	f.Sheet.Delete("Sheet1")
+	// Save spreadsheet by the given path.
+	if err := f.SaveAs(outputPath + "_consumer_groups.xlsx"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (e ExcelExporter) ExportTopics(topics []model.Topic, outputPath string) error {
 	f := excelize.NewFile()
 
@@ -30,7 +60,7 @@ func (e ExcelExporter) ExportTopics(topics []model.Topic, outputPath string) err
 	f.SetActiveSheet(index)
 	f.Sheet.Delete("Sheet1")
 	// Save spreadsheet by the given path.
-	if err := f.SaveAs(outputPath + "_Topics.xlsx"); err != nil {
+	if err := f.SaveAs(outputPath + "_topics.xlsx"); err != nil {
 		return err
 	}
 	return nil

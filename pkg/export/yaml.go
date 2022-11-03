@@ -9,17 +9,22 @@ import (
 
 type YamlExporter struct{}
 
-func (e YamlExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-
-	yamlData, err := yaml.Marshal(&topics)
-	if err != nil {
-		return err
+func (e YamlExporter) Export(res interface{}, outputPath string) error {
+	file, errJson := yaml.Marshal(res)
+	if errJson != nil {
+		return errJson
 	}
-
-	fileName := outputPath + "_Topics.yaml"
-	err = ioutil.WriteFile(fileName, yamlData, 0644)
+	err := ioutil.WriteFile(outputPath+"_.yml", file, 0644)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (e YamlExporter) ExportTopics(topics []model.Topic, outputPath string) error {
+	return e.Export(topics, outputPath+"_topics")
+}
+
+func (e YamlExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {
+	return e.Export(cgroups, outputPath+"_consumer_groups")
 }

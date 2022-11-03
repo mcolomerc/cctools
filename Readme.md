@@ -29,6 +29,7 @@ ccloud:
 export:
   resources:
     - topics
+    - consumer_groups
   topics:
     exclude: _confluent
   exporters: 
@@ -56,6 +57,14 @@ Required: Configure resources to export.
 export:  
   resources: 
     - topics
+```
+
+* Export Consumer Groups information: ```consumer_groups```
+
+```yaml
+export:  
+  resources: 
+    - consumer_groups
 ```
 
 #### Output
@@ -148,9 +157,9 @@ export:
 
 ##### ```excel```
 
-OutPut: (<output_path>/<cluster_ID>_Topics.xlsx)
+OutPut: (<output_path>/<cluster_ID>_<resource>.xlsx)
 
-Output Sample: 
+Output Sample for ```topics``` resource:
 
 | Topic	| Partitions |	Replication Factor | Configs |
 |-------|------------|---------------------|---------|
@@ -160,9 +169,9 @@ Output Sample:
 
 ##### ```json```
 
-OutPut: (<output_path>/<cluster_ID>_Topics.json)
+OutPut: (<output_path>/<cluster_ID>_<resource>.json)
 
-Output Sample:
+Output Sample for ```topics``` resource:
 
 ```json
 [
@@ -184,9 +193,9 @@ Output Sample:
 
 ##### ```yaml```
 
-OutPut: (<output_path>/<cluster_ID>_Topics.yaml)
+OutPut: (<output_path>/<cluster_ID>_<resource>.yaml)
 
-Output Sample: 
+Output Sample for ```topics``` resource:
 
 ```yaml
 - name: _confluent-command
@@ -218,9 +227,10 @@ MacOS:
 
 ```./dist/cctools_darwin_amd64_v1/cctools export --config config.yml```
 
-  ### CI/CD
+### CI/CD
 
  There are 2 ```github actions``get on the repo:
 
  1. ````pr-tag```: Create a tag from every PR on the repo. You need to specify #major/#minor/#patch on the cluster for better version control. If not minor version will be created
+
  2. ```release```: Create a new release from the TAG created by the previous tag. This action in created on top of ```goreleaser``` and will create binaries for all the common distributions. 

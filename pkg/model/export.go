@@ -1,5 +1,10 @@
 package model
 
-type ExportResult struct {
-	Topics []Topic
+type ServiceResult struct {
+}
+
+type KafkaServiceResult struct {
+	Topics         []Topic
+	ConsumerGroups []ConsumerGroup
+	ServiceResult
 }
