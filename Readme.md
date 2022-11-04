@@ -9,6 +9,10 @@ It allows to export resources into different formats, that could be used as inpu
 
 <img src="./docs/image.png" width="500">
 
+## Install
+
+Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download your OS distribution.
+
 ## Configuration
 
 Configuration file: ```--config config.yml```
