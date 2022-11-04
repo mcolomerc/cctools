@@ -1,8 +1,13 @@
 
 # Confluent Migration Tools
 
-Command Line Tools for helping on migrations to Confluent Cloud or Confluent Platform.
- 
+`cctools` are command Line tools for helping on migrations to Confluent Cloud or Confluent Platform.
+
+This CLI uses Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster.
+
+It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool.
+
+<img src="./docs/image.png" width="500">
 
 ## Configuration
 
@@ -305,8 +310,8 @@ MacOS:
 
 ### CI/CD
 
- There are 2 ```github actions``get on the repo:
+ There are 2 `github actions` get on the repo:
 
- 1. ````pr-tag```: Create a tag from every PR on the repo. You need to specify #major/#minor/#patch on the cluster for better version control. If not minor version will be created
+ 1. `pr-tag`: Create a tag from every PR on the repo. You need to specify #major/#minor/#patch on the cluster for better version control. If not minor version will be created
 
- 2. ```release```: Create a new release from the TAG created by the previous tag. This action in created on top of ```goreleaser``` and will create binaries for all the common distributions. 
+ 2. `release`: Create a new release from the TAG created by the previous tag. This action in created on top of `goreleaser` and will create binaries for all the common distributions. 
