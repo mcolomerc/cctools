@@ -3,7 +3,7 @@
 
 `cctools` is command Line tool for helping on migrations to Confluent Cloud or Confluent Platform.
 
-This CLI uses Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster.
+This CLI uses Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters. 
 
 It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool.
 
