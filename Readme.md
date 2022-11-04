@@ -209,7 +209,53 @@ Output Sample for ```topics``` resource:
   ...
 ```
 
-##### ```clink```
+##### Confluent For Kubernetes `cfk`
+
+From the selected `topics` export to [Confluent For Kubernetes (CFK) Custom Resources](https://docs.confluent.io/operator/current/co-manage-topics.html#create-ak-topic) `KafkaTopic`. 
+
+Configuration requires:
+
+* namespace
+* kafkarestaclass
+
+Example:
+
+```yaml
+export:
+  resources: 
+    - topics
+  topics:
+    exclude: connect
+  cfk:
+    namespace: confluent  
+    kafkarestclass: kafka 
+  exporters:  
+  - cfk
+```
+
+Output: Exporter will create a <output_path>/<clusterid>_topic_<topicName>.yml file for each Topic. 
+
+Example:
+
+```yml
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: user_transactions
+  namespace: confluent
+spec:
+  replicas: 3
+  partitionCount: 6
+  configs:
+    cleanup.policy: delete
+    compression.type: producer
+    ...
+  kafkaRestClassRef:
+    name: kafka
+
+```
+
+##### Cluster Link ```clink```
 
 From the selected `topics` export [Confluent Cloud Cluster Link](https://docs.confluent.io/cloud/current/multi-cloud/overview.html) scripts and configuration.
 

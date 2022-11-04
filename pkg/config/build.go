@@ -95,6 +95,11 @@ func (c ConfigBuilder) buildExporters() []export.Exporter {
 				OffsetSync:           c.RuntimeConfig.UserConfig.Export.CLink.Sync.Offset,
 				AutoCreate:           c.RuntimeConfig.UserConfig.Export.CLink.AutoCreate,
 			})
+		} else if v == Cfk {
+			exporters = append(exporters, &export.CfkExporter{
+				Namespace:      c.RuntimeConfig.UserConfig.Export.CFK.Namespace,
+				KafkaRestClass: c.RuntimeConfig.UserConfig.Export.CFK.KafkaRestClass,
+			})
 		} else {
 			fmt.Printf("Unrecognized exporter: %v", v)
 		}

@@ -30,6 +30,7 @@ type Export struct {
 	Resources []Resource `yaml:"resources" validate:"required"`
 	Topics    Topics     `yaml:"topics" validate:"omitempty"`
 	CLink     CLink      `yaml:"clink" validate:"omitempty"`
+	CFK       CFK        `yaml:"cfk" validate:"omitempty"`
 	Exporters []Exporter `yaml:"exporters"`
 	Output    string     `yaml:"output" validate:"required"`
 }
@@ -47,6 +48,11 @@ type CLink struct {
 		Offset bool `yaml:"offset"`
 		Acl    bool `yaml:"acl"`
 	} `yaml:"sync"`
+}
+
+type CFK struct {
+	Namespace      string `yaml:"namespace"`
+	KafkaRestClass string `yaml:"kafkarestclass"`
 }
 
 type Resource string
@@ -77,4 +83,5 @@ const (
 	Yaml  Exporter = "yaml"
 	Json  Exporter = "json"
 	Clink Exporter = "clink"
+	Cfk   Exporter = "cfk"
 )
