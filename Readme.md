@@ -1,7 +1,7 @@
 
 # Confluent Migration Tools
 
-`cctools` are command Line tools for helping on migrations to Confluent Cloud or Confluent Platform.
+`cctools` is command Line tool for helping on migrations to Confluent Cloud or Confluent Platform.
 
 This CLI uses Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster.
 
