@@ -74,24 +74,40 @@ func (kService *KafkaService) GetTopics() []model.Topic {
 		return nil
 	}
 	var topicList []model.Topic
-	for _, value := range topics {
-		val := value.(map[string]interface{})
-		t := &model.Topic{
-			Name:              val["topic_name"].(string),
-			Partitions:        val["partitions_count"],
-			ReplicationFactor: val["replication_factor"],
-		}
-		if !kService.checkExclude(t.Name) {
+	finalTopics := kService.TopicsExclusion(topics)
+	done := make(chan model.Topic, len(finalTopics))
+	for _, value := range finalTopics {
+		go func(t model.Topic) {
 			configs, err := kService.GetTopicConfigs(t.Name)
 			if err != nil {
 				log.Printf("client: error getting topic configs : %s\n", err)
 			} else {
 				t.Configs = configs
 			}
-			topicList = append(topicList, *t)
-		}
+			done <- t
+		}(value)
+	}
+	for i := 0; i < len(finalTopics); i++ {
+		topicList = append(topicList, <-done)
 	}
 	return topicList
+}
+
+func (kService *KafkaService) TopicsExclusion(topics []interface{}) []model.Topic {
+	var finalTopics []model.Topic
+	for _, value := range topics {
+		val := value.(map[string]interface{})
+		topicName := val["topic_name"].(string)
+		if !kService.checkExclude(topicName) {
+			t := &model.Topic{
+				Name:              topicName,
+				Partitions:        val["partitions_count"],
+				ReplicationFactor: val["replication_factor"],
+			}
+			finalTopics = append(finalTopics, *t)
+		}
+	}
+	return finalTopics
 }
 
 func (kService *KafkaService) GetTopicConfigs(topic string) ([]model.TopicConfig, error) {
