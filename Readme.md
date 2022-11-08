@@ -319,3 +319,15 @@ MacOS:
  1. `pr-tag`: Create a tag from every PR on the repo. You need to specify #major/#minor/#patch on the cluster for better version control. If not minor version will be created
 
  2. `release`: Create a new release from the TAG created by the previous tag. This action in created on top of `goreleaser` and will create binaries for all the common distributions. 
+
+
+
+	https://docs.confluent.io/cloud/current/connectors/index.html#supported-connectors
+Managed Cloud connectors
+Networking 
+https://docs.confluent.io/cloud/current/connectors/index.html#networking
+Limitations
+https://docs.confluent.io/cloud/current/connectors/limits.html#limitations 
+            Own Managed Connectors
+Connect Kafka Connect to Confluent Cloud
+https://docs.confluent.io/cloud/current/cp-component/connect-cloud-config.html
