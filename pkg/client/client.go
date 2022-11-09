@@ -19,18 +19,18 @@ type KafkaRestClient struct {
 	Bearer string
 }
 
-func New(conf config.RuntimeConfig) *KafkaRestClient {
+func New(conf config.Config) *KafkaRestClient {
 	var client *http.Client
-	tls := conf.UserConfig.Credentials.Certificates != config.Certificates{}
+	tls := conf.Credentials.Certificates != config.Certificates{}
 	if tls {
 		client = &http.Client{
-			Transport: getTransport(conf.UserConfig.Credentials.Certificates),
+			Transport: getTransport(conf.Credentials.Certificates),
 		}
 	} else {
 		client = &http.Client{}
 	}
 
-	user := conf.UserConfig.Credentials.Key + ":" + conf.UserConfig.Credentials.Secret
+	user := conf.Credentials.Key + ":" + conf.Credentials.Secret
 	bearer := b64.StdEncoding.EncodeToString([]byte(user))
 
 	return &KafkaRestClient{

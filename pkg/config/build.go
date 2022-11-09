@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
-	"mcolomerc/cc-tools/pkg/export"
+
 	"os"
 
 	"github.com/go-playground/validator"
@@ -11,15 +11,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-type RuntimeConfig struct {
-	UserConfig Config
-	Exporters  []export.Exporter
-}
 type ConfigBuilder struct {
-	RuntimeConfig RuntimeConfig
+	Config Config
 }
 
-func (c ConfigBuilder) Build(cfgFile string) (RuntimeConfig, error) {
+func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 
 	// Read config file with Viper
 	if cfgFile != "" {
@@ -40,69 +36,34 @@ func (c ConfigBuilder) Build(cfgFile string) (RuntimeConfig, error) {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-	// Validate UserConfig
-	if err := viper.Unmarshal(&c.RuntimeConfig.UserConfig); err != nil {
+	// Validate Config
+	if err := viper.Unmarshal(&c.Config); err != nil {
 		log.Printf("unable to unmarshall the config %v", err)
-		return c.RuntimeConfig, err
+		return c.Config, err
 	}
 	validate := validator.New()
-	if err := validate.Struct(&c.RuntimeConfig.UserConfig); err != nil {
+	if err := validate.Struct(&c.Config); err != nil {
 		log.Printf("Missing required attributes %v\n", err)
-		return c.RuntimeConfig, err
+		return c.Config, err
 	}
 	//Build Output
 	if err := c.buildOutput(); err != nil {
 		log.Printf("Can't mount Output folder %v\n", err)
-		return c.RuntimeConfig, err
+		return c.Config, err
 	}
-	//Build Exporters
-	c.RuntimeConfig.Exporters = c.buildExporters()
-	return c.RuntimeConfig, nil
+
+	return c.Config, nil
 }
 
 // Build output folder
 func (c ConfigBuilder) buildOutput() error {
-	if _, err := os.Stat(c.RuntimeConfig.UserConfig.Export.Output); os.IsNotExist(err) {
-		log.Printf("Export output directory: %s not found. Creating...", c.RuntimeConfig.UserConfig.Export.Output)
-		err := os.Mkdir(c.RuntimeConfig.UserConfig.Export.Output, os.ModePerm)
+	if _, err := os.Stat(c.Config.Export.Output); os.IsNotExist(err) {
+		log.Printf("Export output directory: %s not found. Creating...", c.Config.Export.Output)
+		err := os.Mkdir(c.Config.Export.Output, os.ModePerm)
 		if err != nil {
-			log.Fatalf("Export output directory: %s - %v", c.RuntimeConfig.UserConfig.Export.Output, err)
+			log.Fatalf("Export output directory: %s - %v", c.Config.Export.Output, err)
 			return err
 		}
 	}
 	return nil
-}
-
-// Build exporters
-func (c ConfigBuilder) buildExporters() []export.Exporter {
-	var exporters []export.Exporter
-	for _, v := range c.RuntimeConfig.UserConfig.Export.Exporters {
-		if v == Excel {
-			exporters = append(exporters, &export.ExcelExporter{})
-		} else if v == Json {
-			exporters = append(exporters, &export.JsonExporter{})
-		} else if v == Yaml {
-			exporters = append(exporters, &export.YamlExporter{})
-		} else if v == Clink {
-			exporters = append(exporters, &export.ClinkExporter{
-				LinkName:             c.RuntimeConfig.UserConfig.Export.CLink.Name,
-				SourceClusterId:      c.RuntimeConfig.UserConfig.Cluster,
-				BootstrapServer:      c.RuntimeConfig.UserConfig.BootstrapServer,
-				SourceApiKey:         c.RuntimeConfig.UserConfig.Credentials.Key,
-				SourceApiSecret:      c.RuntimeConfig.UserConfig.Credentials.Secret,
-				DestinationClusterId: c.RuntimeConfig.UserConfig.Export.CLink.Destination,
-				AclSync:              c.RuntimeConfig.UserConfig.Export.CLink.Sync.Acl,
-				OffsetSync:           c.RuntimeConfig.UserConfig.Export.CLink.Sync.Offset,
-				AutoCreate:           c.RuntimeConfig.UserConfig.Export.CLink.AutoCreate,
-			})
-		} else if v == Cfk {
-			exporters = append(exporters, &export.CfkExporter{
-				Namespace:      c.RuntimeConfig.UserConfig.Export.CFK.Namespace,
-				KafkaRestClass: c.RuntimeConfig.UserConfig.Export.CFK.KafkaRestClass,
-			})
-		} else {
-			fmt.Printf("Unrecognized exporter: %v", v)
-		}
-	}
-	return exporters
 }

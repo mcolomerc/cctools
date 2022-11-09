@@ -12,7 +12,7 @@ type ExportHandler struct {
 	Services []Service
 }
 
-func NewExportHandler(conf config.RuntimeConfig) *ExportHandler {
+func NewExportHandler(conf config.Config) *ExportHandler {
 	var services []Service
 	services = append(services, NewKafkaService(conf))
 	return &ExportHandler{

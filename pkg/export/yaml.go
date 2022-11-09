@@ -2,7 +2,6 @@ package export
 
 import (
 	"io/ioutil"
-	"mcolomerc/cc-tools/pkg/model"
 
 	"gopkg.in/yaml.v2"
 )
@@ -19,12 +18,4 @@ func (e YamlExporter) Export(res interface{}, outputPath string) error {
 		return err
 	}
 	return nil
-}
-
-func (e YamlExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-	return e.Export(topics, outputPath+"_topics")
-}
-
-func (e YamlExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {
-	return e.Export(cgroups, outputPath+"_consumer_groups")
 }

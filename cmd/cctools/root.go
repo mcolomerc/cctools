@@ -13,7 +13,7 @@ import (
 
 var version = "0.0.1"
 var cfgFile string
-var toolsConfig config.RuntimeConfig
+var toolsConfig config.Config
 var exportHandler services.ExportHandler
 
 var rootCmd = &cobra.Command{
