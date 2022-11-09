@@ -14,12 +14,12 @@ import (
 	"net/http"
 )
 
-type KafkaRestClient struct {
+type RestClient struct {
 	Client http.Client
 	Bearer string
 }
 
-func New(conf config.Config) *KafkaRestClient {
+func New(conf config.Config) *RestClient {
 	var client *http.Client
 	tls := conf.Credentials.Certificates != config.Certificates{}
 	if tls {
@@ -33,14 +33,14 @@ func New(conf config.Config) *KafkaRestClient {
 	user := conf.Credentials.Key + ":" + conf.Credentials.Secret
 	bearer := b64.StdEncoding.EncodeToString([]byte(user))
 
-	return &KafkaRestClient{
+	return &RestClient{
 		Client: *client,
 		Bearer: bearer,
 	}
 }
 
 // POST request
-func (kClient *KafkaRestClient) Post(requestURL string, requestBody []byte) ([]interface{}, error) {
+func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interface{}, error) {
 
 	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -56,7 +56,7 @@ func (kClient *KafkaRestClient) Post(requestURL string, requestBody []byte) ([]i
 	return resp, nil
 }
 
-func (kClient *KafkaRestClient) Get(requestURL string) (interface{}, error) {
+func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
@@ -73,7 +73,7 @@ func (kClient *KafkaRestClient) Get(requestURL string) (interface{}, error) {
 
 // Get Request
 // Expect results --> data:[]
-func (kClient *KafkaRestClient) GetList(requestURL string) ([]interface{}, error) {
+func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
 	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
@@ -89,7 +89,7 @@ func (kClient *KafkaRestClient) GetList(requestURL string) ([]interface{}, error
 	return resp, nil
 }
 
-func (kClient *KafkaRestClient) buildArrayRequest(req *http.Request) ([]interface{}, error) {
+func (kClient *RestClient) buildArrayRequest(req *http.Request) ([]interface{}, error) {
 	result, err := kClient.build(req)
 	if err != nil {
 		fmt.Printf("client: could not get result: %s\n", err)
@@ -102,12 +102,12 @@ func (kClient *KafkaRestClient) buildArrayRequest(req *http.Request) ([]interfac
 	return nil, errors.New("No data result")
 }
 
-func (kClient *KafkaRestClient) buildRequest(req *http.Request) (interface{}, error) {
+func (kClient *RestClient) buildRequest(req *http.Request) (interface{}, error) {
 	return kClient.build(req)
 }
 
 // Build request - Client Do
-func (kClient *KafkaRestClient) build(req *http.Request) (map[string]any, error) {
+func (kClient *RestClient) build(req *http.Request) (map[string]any, error) {
 	req.Header.Set("Authorization", "Basic "+kClient.Bearer)
 	req.Header.Set("Content-Type", "application/json;charset=utf-8")
 	res, err := kClient.Client.Do(req)

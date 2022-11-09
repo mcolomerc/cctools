@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/spf13/cobra v1.6.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -34,7 +35,6 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

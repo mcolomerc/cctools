@@ -11,7 +11,7 @@ import (
 )
 
 type KafkaService struct {
-	KafkaRestClient client.KafkaRestClient
+	KafkaRestClient client.RestClient
 	Conf            config.Config
 	ClusterUrl      string
 	KafkaExporters  []kafkaexp.KafkaExporter

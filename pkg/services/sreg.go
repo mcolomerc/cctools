@@ -7,7 +7,7 @@ import (
 )
 
 type SchemasService struct {
-	KafkaRestClient   client.KafkaRestClient
+	RestClient        client.RestClient
 	Conf              config.Config
 	SchemaRegistryUrl string
 }
@@ -15,7 +15,7 @@ type SchemasService struct {
 func NewSchemasService(conf config.Config) *SchemasService {
 	restClient := client.New(conf)
 	return &SchemasService{
-		KafkaRestClient:   *restClient,
+		RestClient:        *restClient,
 		Conf:              conf,
 		SchemaRegistryUrl: fmt.Sprintf("%s/", conf.SchemaRegistryUrl),
 	}
