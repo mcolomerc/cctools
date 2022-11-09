@@ -7,7 +7,6 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"mcolomerc/cc-tools/pkg/config"
@@ -57,10 +56,9 @@ func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interf
 }
 
 func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
-	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		fmt.Printf("Rest client: could not create request: %s\n", err)
+		log.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildRequest(req)
@@ -74,10 +72,9 @@ func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 // Get Request
 // Expect results --> data:[]
 func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
-	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		fmt.Printf("Rest client: could not create request: %s\n", err)
+		log.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildArrayRequest(req)
@@ -92,7 +89,7 @@ func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
 func (kClient *RestClient) buildArrayRequest(req *http.Request) ([]interface{}, error) {
 	result, err := kClient.build(req)
 	if err != nil {
-		fmt.Printf("Rest client: could not get result: %s\n", err)
+		log.Printf("Rest client: could not get result: %s\n", err)
 		return nil, err
 	}
 	switch v := result.(type) {
@@ -117,16 +114,15 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 	req.Header.Set("Content-Type", "application/json;charset=utf-8")
 	res, err := kClient.Client.Do(req)
 	if err != nil {
-		fmt.Printf("Rest client: error making http request: %s\n", err)
+		log.Printf("Rest client: error making http request: %s\n", err)
 		return nil, err
 	}
 	if res.StatusCode == http.StatusNotFound {
-		fmt.Printf("Rest client:: 404 - Not found %v \n", err)
-		return nil, err
+		log.Println("Rest Client: 404 - Resource not Found")
 	}
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("Rest client:: could not read response body: %s\n", err)
+		log.Printf("Rest client:: could not read response body: %s\n", err)
 		return nil, err
 	}
 
@@ -144,13 +140,13 @@ func getTransport(certificates config.Certificates) *http.Transport {
 	// Load client cert
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		fmt.Printf("error loading cert files")
+		log.Printf("Error loading cert files")
 	}
 
 	// Load CA cert
 	caCert, err := ioutil.ReadFile(caFile)
 	if err != nil {
-		fmt.Printf("Error reading the CA cert")
+		log.Printf("Error reading the CA cert")
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
