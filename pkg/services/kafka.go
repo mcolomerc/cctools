@@ -99,7 +99,8 @@ func (kService *KafkaService) Export() {
 func (kService *KafkaService) GetTopics() []model.Topic {
 	topics, err := kService.RestClient.GetList(kService.ClusterUrl + "/topics")
 	if err != nil {
-		log.Printf("client: error getting topics : %s\n", err)
+		log.Printf("Error getting Topics : %s\n", err)
+		return nil
 	}
 	var topicList []model.Topic
 	finalTopics := kService.TopicsExclusion(topics)
@@ -108,7 +109,7 @@ func (kService *KafkaService) GetTopics() []model.Topic {
 		go func(t model.Topic) {
 			configs, err := kService.GetTopicConfigs(t.Name)
 			if err != nil {
-				log.Printf("client: error getting topic configs : %s\n", err)
+				log.Printf("Error getting Topic configs : %s\n", err)
 			} else {
 				t.RetentionTime = getElementFromTopicConfigs(configs, "retention.ms")
 				t.MinIsr = getElementFromTopicConfigs(configs, "min.insync.replicas")
@@ -152,7 +153,7 @@ func (kService *KafkaService) TopicsExclusion(topics []interface{}) []model.Topi
 func (kService *KafkaService) GetTopicConfigs(topic string) ([]model.TopicConfig, error) {
 	configs, err := kService.RestClient.GetList(kService.ClusterUrl + "/topics/" + topic + "/configs")
 	if err != nil {
-		fmt.Printf("client: error getting topic configs : %s\n", err)
+		log.Printf("Error getting Topic configs : %s\n", err)
 		return nil, err
 	}
 	var configsTopic []model.TopicConfig
@@ -176,7 +177,8 @@ func getElementFromTopicConfigs(topicConfigs []model.TopicConfig, keyToSearch st
 func (kService *KafkaService) GetConsumerGroups() []model.ConsumerGroup {
 	cGroups, err := kService.RestClient.GetList(kService.ClusterUrl + "/consumer-groups")
 	if err != nil {
-		fmt.Printf("client: error getting consumer-groups : %s\n", err)
+		fmt.Printf("Error getting consumer-groups : %s\n", err)
+		return nil
 	}
 
 	var consumerGroups []model.ConsumerGroup
@@ -202,7 +204,8 @@ func (kService *KafkaService) GetConsumerGroups() []model.ConsumerGroup {
 func (kService *KafkaService) GetLag(group string) []model.Lag {
 	lagResp, err := kService.RestClient.GetList(kService.ClusterUrl + "/consumer-groups/" + group + "/lags")
 	if err != nil {
-		log.Printf("client: error getting consumer groups lags : %s\n", err)
+		fmt.Printf("Error getting consumer groups lags : %s\n", err)
+		return nil
 	}
 	var lags []model.Lag
 	for _, value := range lagResp {
@@ -225,7 +228,7 @@ func (kService *KafkaService) GetLagSummary(group string) model.LagSummary {
 	fmt.Println(lagResp)
 	var lags model.LagSummary
 	if err != nil {
-		fmt.Printf("client: error getting consumers : %s\n", err)
+		fmt.Printf("Error getting consumers : %s\n", err)
 	}
 	return lags
 }
@@ -233,7 +236,8 @@ func (kService *KafkaService) GetLagSummary(group string) model.LagSummary {
 func (kService *KafkaService) GetConsumers(group string) []model.Consumer {
 	consumersResp, err := kService.RestClient.GetList(kService.ClusterUrl + "/consumer-groups/" + group + "/consumers")
 	if err != nil {
-		log.Printf("client: error getting consumers : %s\n", err)
+		fmt.Printf("Error getting consumers : %s\n", err)
+		return nil
 	}
 
 	var consumers []model.Consumer

@@ -7,6 +7,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"mcolomerc/cc-tools/pkg/config"
@@ -43,12 +44,10 @@ func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interf
 
 	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(requestBody))
 	if err != nil {
-		log.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildArrayRequest(req)
 	if err != nil {
-		log.Printf("Rest client: POST %s response error: %s\n", requestURL, err)
 		return nil, err
 	}
 
@@ -58,12 +57,10 @@ func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interf
 func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		log.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildRequest(req)
 	if err != nil {
-		log.Printf("Rest client: GET %s response error: %s\n", requestURL, err)
 		return nil, err
 	}
 	return resp, nil
@@ -74,12 +71,10 @@ func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		log.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildArrayRequest(req)
 	if err != nil {
-		log.Printf("Rest client: GET %s response error: %s\n", requestURL, err)
 		return nil, err
 	}
 
@@ -89,7 +84,6 @@ func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
 func (kClient *RestClient) buildArrayRequest(req *http.Request) ([]interface{}, error) {
 	result, err := kClient.build(req)
 	if err != nil {
-		log.Printf("Rest client: could not get result: %s\n", err)
 		return nil, err
 	}
 	switch v := result.(type) {
@@ -117,8 +111,9 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 		log.Printf("Rest client: error making http request: %s\n", err)
 		return nil, err
 	}
-	if res.StatusCode == http.StatusNotFound {
-		log.Println("Rest Client: 404 - Resource not Found")
+	if res.StatusCode != http.StatusOK {
+		errorString := fmt.Sprintf("Rest client:: %d - %s : %v \n", res.StatusCode, req.Method, req.URL)
+		return nil, errors.New(errorString)
 	}
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
