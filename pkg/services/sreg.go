@@ -24,7 +24,7 @@ func NewSchemasService(conf config.Config) *SchemasService {
 		} else if v == config.Yaml {
 			exporters = append(exporters, &export.YamlExporter{})
 		} else {
-			fmt.Printf("Schema Registry exporter: Unrecognized exporter: %v \n", v)
+			log.Printf("Schema Registry exporter: Unrecognized exporter: %v \n", v)
 		}
 	}
 	return &SchemasService{
@@ -47,7 +47,7 @@ func (service *SchemasService) Export() {
 				go func(v export.Exporter) {
 					err := v.Export(result, outputPath)
 					if err != nil {
-						fmt.Printf("Error: %s\n", err)
+						log.Printf("Error: %s\n", err)
 					}
 					done <- true
 				}(v)
@@ -63,7 +63,7 @@ func (service *SchemasService) Export() {
 func (service *SchemasService) GetConfig() interface{} {
 	config, err := service.RestClient.Get(service.SchemaRegistryUrl + "config")
 	if err != nil {
-		log.Printf("client: error getting Schema Registry config : %s\n", err)
+		log.Printf("Error getting Schema Registry config : %s\n", err)
 	}
 	return config
 }
@@ -71,7 +71,7 @@ func (service *SchemasService) GetConfig() interface{} {
 func (service *SchemasService) GetSubjects() interface{} {
 	subjects, err := service.RestClient.Get(service.SchemaRegistryUrl + "subjects")
 	if err != nil {
-		log.Printf("client: error getting Schema Registry config : %s\n", err)
+		log.Printf("Error getting Schema Registry config : %s\n", err)
 	}
 	return subjects
 }
