@@ -18,9 +18,8 @@ type KafkaService struct {
 }
 
 func NewKafkaService(conf config.Config) *KafkaService {
-	restClient := client.New(conf)
+	restClient := client.New(conf.EndpointUrl, conf.Credentials)
 	var exporters []kafkaexp.KafkaExporter
-
 	for _, v := range conf.Export.Exporters {
 		if v == config.Excel {
 			exporters = append(exporters, &kafkaexp.KafkaExcelExporter{})
@@ -33,7 +32,7 @@ func NewKafkaService(conf config.Config) *KafkaService {
 		} else if v == config.Cfk {
 			exporters = append(exporters, kafkaexp.NewKafkaCfkExporter(conf))
 		} else {
-			fmt.Printf("Unrecognized exporter: %v", v)
+			fmt.Printf("Kafka Exporter: Unrecognized exporter: %v \n ", v)
 		}
 	}
 	return &KafkaService{

@@ -19,18 +19,18 @@ type RestClient struct {
 	Bearer string
 }
 
-func New(conf config.Config) *RestClient {
+func New(url string, credentials config.Credentials) *RestClient {
 	var client *http.Client
-	tls := conf.Credentials.Certificates != config.Certificates{}
+	tls := credentials.Certificates != config.Certificates{}
 	if tls {
 		client = &http.Client{
-			Transport: getTransport(conf.Credentials.Certificates),
+			Transport: getTransport(credentials.Certificates),
 		}
 	} else {
 		client = &http.Client{}
 	}
 
-	user := conf.Credentials.Key + ":" + conf.Credentials.Secret
+	user := credentials.Key + ":" + credentials.Secret
 	bearer := b64.StdEncoding.EncodeToString([]byte(user))
 
 	return &RestClient{
@@ -44,12 +44,12 @@ func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interf
 
 	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(requestBody))
 	if err != nil {
-		log.Printf("Kafka Rest client: could not create request: %s\n", err)
+		log.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildArrayRequest(req)
 	if err != nil {
-		log.Printf("Kafka Rest client: POST %s response error: %s\n", requestURL, err)
+		log.Printf("Rest client: POST %s response error: %s\n", requestURL, err)
 		return nil, err
 	}
 
@@ -60,12 +60,12 @@ func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		fmt.Printf("client: could not create request: %s\n", err)
+		fmt.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildRequest(req)
 	if err != nil {
-		log.Printf("Kafka Rest client: GET %s response error: %s\n", requestURL, err)
+		log.Printf("Rest client: GET %s response error: %s\n", requestURL, err)
 		return nil, err
 	}
 	return resp, nil
@@ -77,12 +77,12 @@ func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
 	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		fmt.Printf("client: could not create request: %s\n", err)
+		fmt.Printf("Rest client: could not create request: %s\n", err)
 		return nil, err
 	}
 	resp, err := kClient.buildArrayRequest(req)
 	if err != nil {
-		log.Printf("Kafka Rest client: GET %s response error: %s\n", requestURL, err)
+		log.Printf("Rest client: GET %s response error: %s\n", requestURL, err)
 		return nil, err
 	}
 
@@ -92,13 +92,18 @@ func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
 func (kClient *RestClient) buildArrayRequest(req *http.Request) ([]interface{}, error) {
 	result, err := kClient.build(req)
 	if err != nil {
-		fmt.Printf("client: could not get result: %s\n", err)
+		fmt.Printf("Rest client: could not get result: %s\n", err)
 		return nil, err
 	}
-
-	if result["data"] != nil {
-		return result["data"].([]interface{}), nil
+	switch v := result.(type) {
+	case map[string]interface{}:
+		if v["data"] != nil {
+			return v["data"].([]interface{}), nil
+		}
+	default:
+		return result.([]interface{}), nil
 	}
+
 	return nil, errors.New("No data result")
 }
 
@@ -107,25 +112,25 @@ func (kClient *RestClient) buildRequest(req *http.Request) (interface{}, error) 
 }
 
 // Build request - Client Do
-func (kClient *RestClient) build(req *http.Request) (map[string]any, error) {
+func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 	req.Header.Set("Authorization", "Basic "+kClient.Bearer)
 	req.Header.Set("Content-Type", "application/json;charset=utf-8")
 	res, err := kClient.Client.Do(req)
 	if err != nil {
-		fmt.Printf("client: error making http request: %s\n", err)
+		fmt.Printf("Rest client: error making http request: %s\n", err)
 		return nil, err
 	}
 	if res.StatusCode == http.StatusNotFound {
-		fmt.Printf("client: 404 - Not found %v \n", err)
+		fmt.Printf("Rest client:: 404 - Not found %v \n", err)
 		return nil, err
 	}
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("client: could not read response body: %s\n", err)
+		fmt.Printf("Rest client:: could not read response body: %s\n", err)
 		return nil, err
 	}
 
-	var result map[string]any
+	var result interface{}
 	json.Unmarshal([]byte(resBody), &result)
 	return result, nil
 }

@@ -1,18 +1,23 @@
 package config
 
 type Config struct {
-	Cluster           string      `yaml:"cluster" validate:"required"`
-	EndpointUrl       string      `yaml:"endpointUrl" validate:"required"`
-	BootstrapServer   string      `yaml:"bootstrapServer" validate:"required"`
-	Credentials       Credentials `yaml:"credentials"`
-	CCloud            CCloud      `yaml:"ccloud" validate:"omitempty"`
-	Export            Export      `yaml:"export"`
-	SchemaRegistryUrl string      `yaml:"schemaregistryUrl"`
+	Cluster         string         `yaml:"cluster" validate:"required"`
+	EndpointUrl     string         `yaml:"endpointUrl" validate:"required"`
+	BootstrapServer string         `yaml:"bootstrapServer" validate:"required"`
+	Credentials     Credentials    `yaml:"credentials"`
+	CCloud          CCloud         `yaml:"ccloud" validate:"omitempty"`
+	Export          Export         `yaml:"export"`
+	SchemaRegistry  SchemaRegistry `yaml:"schemaregistry" validate:"omitempty"`
+}
+
+type SchemaRegistry struct {
+	EndpointUrl string      `yaml:"endpointUrl"`
+	Credentials Credentials `yaml:"credentials"`
 }
 
 type Credentials struct {
-	Key          string       `yaml:"key" validate:"required"`
-	Secret       string       `yaml:"secret" validate:"required"`
+	Key          string       `yaml:"key"`
+	Secret       string       `yaml:"secret"`
 	Certificates Certificates `yaml:"certificates" validate:"omitempty"`
 }
 

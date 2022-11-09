@@ -14,6 +14,7 @@ It allows to export resources into different formats, that could be used as inpu
 Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download your OS distribution.
 
 ## Configuration
+The tool needs a configuration file (yml).
 
 Configuration file: ```--config config.yml```
 
@@ -34,11 +35,113 @@ credentials:
     keyFile: <KEY file path>  
     CAFile: <CA File path>
 ccloud:
-  environment: <ENVIRONMENT_ID>  
+  environment: <ENVIRONMENT_ID>   
+```
+
+### Connection
+
+* Rest Api URL: ```endpointUrl: <REST_ENDPOINT>```
+
+* Credentials: 
+  - ```key: <USER>``` or Confluent Cloud API_KEY. 
+  - ```secret: <PASSWORD>``` or Confluent Cloud API_SECRET  
+
+```yaml
+cluster: <CLUSTER_ID>
+#bootstrap server
+bootstrapServer: <BOOTSTRAP_SERVER> 
+#REST endpint 
+endpointUrl: <REST_ENDPOINT>
+#Credentials
+credentials: 
+  key: <USER> # or CCloud API_KEY 
+  secret: <PASSWORD> # or CCloud API_SECRET   
+```
+
+If certiticates are needed:
+
+  - Certificates: 
+    - certFile: Certificate file path
+    - keyFile: Key file path
+    - CAFile: CA file path
+
+
+```yaml
+cluster: <CLUSTER_ID>
+#bootstrap server
+bootstrapServer: <BOOTSTRAP_SERVER> 
+#REST endpint 
+endpointUrl: <REST_ENDPOINT>
+#Credentials
+credentials: 
+  key: <USER>  
+  secret: <PASSWORD>  
+  # Certificates - Confluent Platform 
+  certificates: 
+    certFile: <CERT file path>  
+    keyFile: <KEY file path>  
+    CAFile: <CA File path>
+```
+
+#### Schema Registry 
+
+Schema Registry connection configuration:
+
+```yaml
+#Schema Registry 
+schemaRegistry: 
+  endpointUrl: <Schema_Registry_Url>
+#Credentials
+  credentials: 
+    key: <USER> # or CCloud API_KEY 
+    secret: <PASSWORD> # or CCloud API_SECRET   
+```
+
+If certiticates are needed:
+
+  - Certificates: 
+    - certFile: Certificate file path
+    - keyFile: Key file path
+    - CAFile: CA file path
+
+```yaml
+#Schema Registry 
+schemaRegistry: 
+  endpointUrl: <Schema_Registry_Url>
+#Credentials
+  credentials: 
+    key: <USER>  
+    secret: <PASSWORD>  
+  certificates: 
+    certFile: <CERT file path>  
+    keyFile: <KEY file path>  
+    CAFile: <CA File path>
+```
+
+## Commands
+
+`export`
+
+Configuration:
+
+ * Resources to export, a list of resources to export, available values: `topics`, `consumer_groups`, `schemas`.  
+ * Output path
+ * Exporter configuration 
+   * Specific configuration for each exporter (See Exporters)
+ * List of Exporters 
+   * List of export formats: 
+     * `json`: Json files
+     * `yaml`: YAML files
+     * `excel`: Excel files
+     * `clink`: Cluster Linking commands (.sh and configuration files) 
+     * `cfk`: Confluent For Kubernetes Custom Resources definitions. (YAML for Kubernetes)
+
+```yaml
 export:
   resources:
     - topics
     - consumer_groups
+    - schemas
   topics:
     exclude: _confluent
   exporters: 
@@ -46,17 +149,9 @@ export:
   - yaml 
   - json  
   output: output #Output Path
-```
+``` 
 
-## Commands
-
-### Export
-
-Export Topic information:
-
-```cctools export --config config.yml```
-
-####  Resources
+**Resources**
 
 Required: Configure resources to export.
 
@@ -76,9 +171,19 @@ export:
     - consumer_groups
 ```
 
-#### Output
+* Export Schema Registry information: ```schemas```
 
-Configure the output folder, it will be created if it does not exist. 
+```yaml
+export:  
+  resources: 
+    - schemas
+```
+
+**TBD**: Schema registry exporters only supports JSON and YAML Exporters.
+
+**Output**
+
+Configure the output folder, it will be created if it does not exist.
 
 Example: All the export files will be stored into the ```output``` folder (it will be created if necessary).
   
@@ -87,9 +192,11 @@ export:
   output: output 
 ```
 
-#### Exclude 
+### Exporter configuration
 
-##### Topics
+#### Topics
+
+**Exclude** 
 
 Exclude Topics by name containing ```string```.
 
@@ -99,9 +206,7 @@ export:
     exclude: _confluent
 ```
 
-#### Include
-
-##### Topics
+**Include** 
 
 Include only Topics by name containing ```string```.
 
@@ -111,7 +216,7 @@ export:
     include: _confluent
 ```
 
-#### Exclude & Include
+**Exclude & Include**
 
 ```include``` can be used with ```exclude``` rules.  
 
@@ -140,13 +245,54 @@ export:
     include: _confluent
 ```
 
+#### Cluster Link
+
+Configuration requires:
+
+ * name: Cluster Link name `string`
+ * destination: Destination cluster ID `string`
+ * autocreate: Autocreate topics `true|false`
+ * sync: 
+    * offset: Offset sync `true|false`
+    * acl: Acl Sync `true|false` 
+
+
+```yaml
+export:
+  clink:
+    name: <CLUSTER_LINK_NAME>
+    destination: <DESTINATION_CLUSTER_ID>
+    autocreate: true | false
+    sync: 
+      offset: true | false
+      acl: true | false 
+  exporters:  
+  - clink 
+```
+
+#### Confluent For Kubernetes 
+
+Configuration requires:
+
+* namespace: target namespace `string`
+* kafkarestaclass: Kafka Rest Class name `string`
+
+```yaml
+export:
+  cfk:
+    namespace: confluent  
+    kafkarestclass: kafka 
+  exporters:
+  - cfk  
+```
+
 ---
 
-#### Exporters
+### Exporters
 
-```cctools export``` supports different exporters by configuration.
+```cctools export``` supports different exporters by configuration: `json`, `yaml`,`excel`, `clink`, `cfk`
 
-Example: Use the following configuration to export to YAML format only:
+Example: Use the following configuration to export to *YAML* format only:
 
 ```yaml
 export:
@@ -154,7 +300,7 @@ export:
   - yaml  
 ```
 
-Example: Use the following configuration to export to Excel, YAML and JSON formats: 
+Example: Use the following configuration to export to *Excel*, YAML and JSON formats:
 
 ```yaml
 export:
@@ -164,19 +310,7 @@ export:
   - json  
 ```
 
-##### ```excel```
-
-OutPut: (<output_path>/<cluster_ID>_<resource>.xlsx)
-
-Output Sample for ```topics``` resource:
-
-| Topic	| Partitions |	Replication Factor | Configs |
-|-------|------------|---------------------|---------|
-|_confluent-command |	1 |	3 |	cleanup.policy=compact compression.type=producer delete.retention.ms=86400000 ...|
-| my-topic | 6 | 3 | cleanup.policy=delete compression.type=producer delete.retention.ms=86400000 ...| 
-| ... | | | | 
-
-##### ```json```
+**```json```**
 
 OutPut: (<output_path>/<cluster_ID>_<resource>.json)
 
@@ -200,7 +334,21 @@ Output Sample for ```topics``` resource:
    ...
 ```
 
-##### ```yaml```
+**```excel```**
+
+OutPut: (<output_path>/<cluster_ID>_<resource>.xlsx)
+
+Output Sample for ```topics``` resource:
+
+| Topic	| Partitions |	Replication Factor | Configs |
+|-------|------------|---------------------|---------|
+|_confluent-command |	1 |	3 |	cleanup.policy=compact compression.type=producer delete.retention.ms=86400000 ...|
+| my-topic | 6 | 3 | cleanup.policy=delete compression.type=producer delete.retention.ms=86400000 ...| 
+| ... | | | | 
+
+
+
+**```yaml```**
 
 OutPut: (<output_path>/<cluster_ID>_<resource>.yaml)
 
@@ -218,31 +366,11 @@ Output Sample for ```topics``` resource:
   ...
 ```
 
-##### Confluent For Kubernetes `cfk`
+**`cfk`**
 
-From the selected `topics` export to [Confluent For Kubernetes (CFK) Custom Resources](https://docs.confluent.io/operator/current/co-manage-topics.html#create-ak-topic) `KafkaTopic`. 
+From the selected resources export to [Confluent For Kubernetes (CFK) Custom Resources](https://docs.confluent.io/operator/current/co-manage-topics.html#create-ak-topic) `KafkaTopic`. 
 
-Configuration requires:
-
-* namespace
-* kafkarestaclass
-
-Example:
-
-```yaml
-export:
-  resources: 
-    - topics
-  topics:
-    exclude: connect
-  cfk:
-    namespace: confluent  
-    kafkarestclass: kafka 
-  exporters:  
-  - cfk
-```
-
-Output: Exporter will create a <output_path>/<clusterid>_topic_<topicName>.yml file for each Topic. 
+Output: Exporter will create a <output_path>/<clusterid>_<resource>_<topicName>.yml file for each Topic. 
 
 Example:
 
@@ -264,7 +392,7 @@ spec:
 
 ```
 
-##### Cluster Link ```clink```
+**```clink```**
 
 From the selected `topics` export [Confluent Cloud Cluster Link](https://docs.confluent.io/cloud/current/multi-cloud/overview.html) scripts and configuration.
 
@@ -274,25 +402,6 @@ Output: The export will generate:
 * Topic promotion script (.sh)
 * Clean up script (.sh)
 * Cluster Link configuration file (.properties), including `auto.create.mirror.topics.filters` from selected `topics`
-
-Exporter configuration:
-
-```yaml
-export: 
-  resources: 
-    - topics
-  topics:
-    exclude: connect
-  clink:
-    name: <CLUSTER_LINK_NAME>
-    destination: <DESTINATION_CLUSTER_ID>
-    autocreate: true | false
-    sync: 
-      offset: true | false
-      acl: true | false 
-  exporters:  
-  - clink 
-``` 
 
 ---
 
