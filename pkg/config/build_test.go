@@ -16,8 +16,8 @@ func TestConfig(t *testing.T) {
 	}
 	want := "superUser"
 
-	if config.UserConfig.Credentials.Key != want || err != nil {
-		t.Fatalf(`TestConfig config.UserConfig.Credentials.Key %s = %s, nil`, config.UserConfig.Credentials.Key, want)
+	if config.Credentials.Key != want || err != nil {
+		t.Fatalf(`TestConfig config.Credentials.Key %s = %s, nil`, config.Credentials.Key, want)
 	}
 }
 
@@ -29,10 +29,10 @@ func TestConfigCloud(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`&ConfigBuilder{}.Build`)
 	}
-	empty := config.UserConfig.Credentials.Certificates != Certificates{}
+	empty := config.Credentials.Certificates != Certificates{}
 
 	if empty {
-		t.Fatalf(`Tconfig.UserConfig.Credentials.Certificates %v, %v`, config.UserConfig.Credentials.Certificates, err)
+		t.Fatalf(`Tconfig.Credentials.Certificates %v, %v`, config.Credentials.Certificates, err)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestConfigYaml(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`&ConfigBuilder{}.Build`)
 	}
-	for _, exp := range config.UserConfig.Export.Exporters {
+	for _, exp := range config.Export.Exporters {
 		if exp != Yaml {
 			t.Fatalf(`Got %v, Expected %v`, exp, Yaml)
 		}
@@ -60,7 +60,7 @@ func TestConfigJson(t *testing.T) {
 		t.Fatalf(`&ConfigBuilder{}.Build`)
 	}
 
-	for _, exp := range config.UserConfig.Export.Exporters {
+	for _, exp := range config.Export.Exporters {
 		if exp != Json {
 			t.Fatalf(`Got %v, Expected %v`, exp, Yaml)
 		}
@@ -72,7 +72,7 @@ func TestConfigMissingExpOutPut(t *testing.T) {
 
 	config, err := ConfigBuilder{}.Build(configFile)
 	if err == nil {
-		t.Fatalf(`Output should be required %v`, config.UserConfig.Export.Output)
+		t.Fatalf(`Output should be required %v`, config.Export.Output)
 	}
 
 }

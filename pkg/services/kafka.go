@@ -5,36 +5,54 @@ import (
 	"log"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
-	"mcolomerc/cc-tools/pkg/export"
+	"mcolomerc/cc-tools/pkg/kafkaexp"
 	"mcolomerc/cc-tools/pkg/model"
 	"strings"
 )
 
 type KafkaService struct {
-	KafkaRestClient client.KafkaRestClient
-	Conf            config.RuntimeConfig
+	KafkaRestClient client.RestClient
+	Conf            config.Config
 	ClusterUrl      string
+	KafkaExporters  []kafkaexp.KafkaExporter
 }
 
-func NewKafkaService(conf config.RuntimeConfig) *KafkaService {
-	restClient := client.New(conf)
+func NewKafkaService(conf config.Config) *KafkaService {
+	restClient := client.New(conf.EndpointUrl, conf.Credentials)
+	var exporters []kafkaexp.KafkaExporter
+	for _, v := range conf.Export.Exporters {
+		if v == config.Excel {
+			exporters = append(exporters, &kafkaexp.KafkaExcelExporter{})
+		} else if v == config.Json {
+			exporters = append(exporters, &kafkaexp.KafkaJsonExporter{})
+		} else if v == config.Yaml {
+			exporters = append(exporters, &kafkaexp.KafkaYamlExporter{})
+		} else if v == config.Clink {
+			exporters = append(exporters, kafkaexp.NewKafkaClinkExporter(conf))
+		} else if v == config.Cfk {
+			exporters = append(exporters, kafkaexp.NewKafkaCfkExporter(conf))
+		} else {
+			fmt.Printf("Kafka Exporter: Unrecognized exporter: %v \n ", v)
+		}
+	}
 	return &KafkaService{
 		KafkaRestClient: *restClient,
 		Conf:            conf,
-		ClusterUrl:      fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.UserConfig.EndpointUrl, conf.UserConfig.Cluster),
+		ClusterUrl:      fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.EndpointUrl, conf.Cluster),
+		KafkaExporters:  exporters,
 	}
 }
 func (kService *KafkaService) Export() {
 	var result model.KafkaServiceResult
-	exportExecutors := kService.Conf.Exporters
-	outputPath := kService.Conf.UserConfig.Export.Output + "/" + kService.Conf.UserConfig.Cluster
+	exportExecutors := kService.KafkaExporters
+	outputPath := kService.Conf.Export.Output + "/" + kService.Conf.Cluster
 	// var err error
-	for _, v := range kService.Conf.UserConfig.Export.Resources {
+	for _, v := range kService.Conf.Export.Resources {
 		if v == config.ExportTopics {
 			result.Topics = kService.GetTopics()
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
-				go func(v export.Exporter) {
+				go func(v kafkaexp.KafkaExporter) {
 					err := v.ExportTopics(result.Topics, outputPath)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
@@ -51,7 +69,7 @@ func (kService *KafkaService) Export() {
 			cgroups := kService.GetConsumerGroups()
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
-				go func(v export.Exporter) {
+				go func(v kafkaexp.KafkaExporter) {
 					err := v.ExportConsumerGroups(cgroups, outputPath)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
@@ -212,17 +230,17 @@ func (kService *KafkaService) GetConsumers(group string) []model.Consumer {
 }
 
 func (kService *KafkaService) checkExclude(topic string) bool {
-	if kService.Conf.UserConfig.Export.Topics.Exclude != "" {
-		if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Exclude) {
-			if kService.Conf.UserConfig.Export.Topics.Include != "" {
-				if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Include) {
+	if kService.Conf.Export.Topics.Exclude != "" {
+		if strings.Contains(topic, kService.Conf.Export.Topics.Exclude) {
+			if kService.Conf.Export.Topics.Include != "" {
+				if strings.Contains(topic, kService.Conf.Export.Topics.Include) {
 					return false
 				}
 			}
 			return true
 		}
-	} else if kService.Conf.UserConfig.Export.Topics.Include != "" {
-		if strings.Contains(topic, kService.Conf.UserConfig.Export.Topics.Include) {
+	} else if kService.Conf.Export.Topics.Include != "" {
+		if strings.Contains(topic, kService.Conf.Export.Topics.Include) {
 			return false
 		} else {
 			return true
