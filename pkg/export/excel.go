@@ -48,13 +48,17 @@ func (e ExcelExporter) ExportTopics(topics []model.Topic, outputPath string) err
 	f.SetCellValue("Topics", "A1", "Topic")
 	f.SetCellValue("Topics", "B1", "Partitions")
 	f.SetCellValue("Topics", "C1", "Replication Factor")
-	f.SetCellValue("Topics", "D1", "Configs")
+	f.SetCellValue("Topics", "D1", "MinISR")
+	f.SetCellValue("Topics", "E1", "Retention Time MS")
+	f.SetCellValue("Topics", "F1", "Configs")
 
 	for key, value := range topics {
 		f.SetCellValue("Topics", "A"+strconv.Itoa(key+2), value.Name)
 		f.SetCellValue("Topics", "B"+strconv.Itoa(key+2), value.Partitions)
 		f.SetCellValue("Topics", "C"+strconv.Itoa(key+2), value.ReplicationFactor)
-		f.SetCellValue("Topics", "D"+strconv.Itoa(key+2), getConfigs(value.Configs))
+		f.SetCellValue("Topics", "D"+strconv.Itoa(key+2), value.MinIsr)
+		f.SetCellValue("Topics", "E"+strconv.Itoa(key+2), value.RetentionTime)
+		f.SetCellValue("Topics", "F"+strconv.Itoa(key+2), getConfigs(value.Configs))
 	}
 
 	f.SetActiveSheet(index)
