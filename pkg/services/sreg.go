@@ -1,11 +1,13 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/export"
+	"mcolomerc/cc-tools/pkg/model"
 )
 
 type SchemasService struct {
@@ -42,20 +44,23 @@ func (service *SchemasService) Export() {
 	for _, v := range service.Conf.Export.Resources {
 		if v == config.ExportSchemas {
 			result := service.GetSubjects()
-			done := make(chan bool, len(exportExecutors))
-			for _, v := range exportExecutors {
-				go func(v export.Exporter) {
-					err := v.Export(result, outputPath)
-					if err != nil {
-						log.Printf("Error: %s\n", err)
-					}
-					done <- true
-				}(v)
+			for _, s := range result {
+				done := make(chan bool, len(exportExecutors))
+				for _, v := range exportExecutors {
+					go func(v export.Exporter, s model.SubjectVersion) {
+						out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
+						err := v.Export(s, out)
+						if err != nil {
+							log.Printf("Error: %s\n", err)
+						}
+						done <- true
+					}(v, s)
+				}
+				for i := 0; i < len(exportExecutors); i++ {
+					<-done
+				}
+				close(done)
 			}
-			for i := 0; i < len(exportExecutors); i++ {
-				<-done
-			}
-			close(done)
 		}
 	}
 }
@@ -68,49 +73,69 @@ func (service *SchemasService) GetConfig() interface{} {
 	return config
 }
 
-func (service *SchemasService) GetSubjects() interface{} {
-	subjects, err := service.RestClient.Get(service.SchemaRegistryUrl + "subjects")
+func (service *SchemasService) GetSubjects() []model.SubjectVersion {
+	subjects, err := service.RestClient.GetList(service.SchemaRegistryUrl + "subjects")
 	if err != nil {
 		log.Printf("Error getting Schema Registry config : %s\n", err)
 	}
+	resp := make([]model.SubjectVersion, len(subjects))
+	done := make(chan []model.SubjectVersion, len(subjects))
+	for _, v := range subjects {
+		go func(subj string) {
+			done <- service.GetSubjectVersions(subj)
+		}(fmt.Sprint(v))
+	}
+	for i := 0; i < len(subjects); i++ {
+		r := <-done
+		resp = append(resp, r...)
+	}
+	return resp
+}
+
+func (service *SchemasService) GetSubjectVersions(subject string) []model.SubjectVersion {
+	subjectsVersions, err := service.RestClient.GetList(service.SchemaRegistryUrl + "subjects/" + subject + "/versions")
+	if err != nil {
+		log.Printf("Error getting Schema Registry GetSubjectVersions : %s\n", err)
+	}
+	resp := make([]model.SubjectVersion, len(subjectsVersions))
+	done := make(chan model.SubjectVersion, len(subjectsVersions))
+	for _, v := range subjectsVersions {
+		id := int(v.(float64))
+		go func(subject string, version string) {
+			done <- service.GetSubjectVersion(subject, version)
+		}(subject, fmt.Sprintf("%d", id))
+	}
+	for i := 0; i < len(subjectsVersions); i++ {
+		resp = append(resp, <-done)
+	}
+	close(done)
+	return resp
+}
+
+func (service *SchemasService) GetSubjectVersion(subject string, version string) model.SubjectVersion {
+	subjVersion, err := service.RestClient.Get(service.SchemaRegistryUrl + "subjects/" + subject + "/versions/" + version)
+	if err != nil {
+		log.Printf("Error getting Schema Registry GetSubjectVersion : %s\n", err)
+	}
+	data := subjVersion.(map[string]interface{})
+	jsonString, _ := json.Marshal(data)
+	subjectVersion := &model.SubjectVersion{}
+	json.Unmarshal([]byte(jsonString), &subjectVersion)
+	return *subjectVersion
+}
+
+func (service *SchemasService) GetSubjectConfig(subject string) interface{} {
+	subjectConfig, err := service.RestClient.Get(service.SchemaRegistryUrl + "subjects/" + subject + "/config")
+	if err != nil {
+		log.Printf("Error getting Schema Registry config : %s\n", err)
+	}
+	return subjectConfig
+}
+
+func (service *SchemasService) GetSchemas() interface{} {
+	subjects, err := service.RestClient.Get(service.SchemaRegistryUrl + "schemas")
+	if err != nil {
+		log.Printf("Error getting Schema Registry GetSchemas : %s\n", err)
+	}
 	return subjects
 }
-
-func (service *SchemasService) GetSubjectVersions() {
-	// /subjects
-}
-
-/**
-List all schema versions registered under the subject “Kafka-value”
-curl -X GET http://localhost:8081/subjects/Kafka-value/versions
-Example result:
-
-
-
-[1]
-Fetch Version 1 of the schema registered under subject “Kafka-value”
-curl -X GET http://localhost:8081/subjects/Kafka-value/versions/1
-Example result:
-
-{"subject":"Kafka-value","version":1,"id":1,"schema":"\"string\""}
-
-Fetch the schema again by globally unique ID 1
-curl -X GET http://localhost:8081/schemas/ids/1
-
-Get the top level config
-curl -X GET http://localhost:8081/config
-
-Get compatibility requirements on a subject
-curl -X GET http://localhost:8081/config/my-kafka-value
-
-List schema types currently registered in Schema Registry
-curl -X GET http://localhost:8081/schemas/types
-
-List all subject-version pairs where a given ID is used
-curl -X GET http://localhost:8081/schemas/ids/2/versions
-
-List IDs of schemas that reference a given schema
-curl -X GET http://localhost:8081/subjects/other.proto/versions/1/referencedby
-
-
-**/
