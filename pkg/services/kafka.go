@@ -17,7 +17,6 @@ type KafkaService struct {
 	RestClient client.RestClient
 	Conf       config.Config
 	mService   MdsService
-	ccConfig   config.CCloud
 	ClusterUrl string
 	KafkaExporters  []kafkaexp.KafkaExporter
 }
@@ -116,7 +115,7 @@ func (kService *KafkaService) GetTopics() []model.Topic {
 				t.Configs = configs
 			}
 
-			if kService.ccConfig.Environment == "" {
+			if kService.mService.Conf.CCloud.Environment == "" {
 				bindings, err := kService.mService.GetResourceBindings("Topic", t.Name)
 				if err != nil {
 					log.Printf("client: error getting topic role bindings for rol and topic: %s\n", err)
