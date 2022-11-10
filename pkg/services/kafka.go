@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"mcolomerc/cc-tools/pkg/client"
@@ -110,8 +111,20 @@ func (kService *KafkaService) GetTopics() []model.Topic {
 			if err != nil {
 				log.Printf("Error getting Topic configs : %s\n", err)
 			} else {
-				t.RetentionTime = getElementFromTopicConfigs(configs, "retention.ms")
-				t.MinIsr = getElementFromTopicConfigs(configs, "min.insync.replicas")
+				retentionTime, err := getElementFromTopicConfigs(configs, "retention.ms")
+				if err != nil {
+					t.RetentionTime = retentionTime
+				} else {
+					log.Println(err)
+				}
+				
+				minIsr,err := getElementFromTopicConfigs(configs, "min.insync.replicas")
+				if err != nil {
+					t.MinIsr = minIsr					
+				} else {
+					log.Println(err)
+				}
+				
 				t.Configs = configs
 			}
 
@@ -167,10 +180,14 @@ func (kService *KafkaService) GetTopicConfigs(topic string) ([]model.TopicConfig
 	return configsTopic, nil
 }
 
-func getElementFromTopicConfigs(topicConfigs []model.TopicConfig, keyToSearch string) string {
+func getElementFromTopicConfigs(topicConfigs []model.TopicConfig, keyToSearch string) (string, error) {
 	index := slices.IndexFunc(topicConfigs, func(c model.TopicConfig) bool { return c.Name == keyToSearch })
 
-	return topicConfigs[index].Value.(string)
+	if index == -1 {
+		errorString := fmt.Sprintf("%s not found on topic configs", keyToSearch)
+       return "", errors.New(errorString)
+	}
+	return topicConfigs[index].Value.(string), nil
 }
 
 func (kService *KafkaService) GetConsumerGroups() []model.ConsumerGroup {

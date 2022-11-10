@@ -6,25 +6,27 @@ import (
 	"log"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
-	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/model"
+	"mcolomerc/cc-tools/pkg/export/sregexp"
 )
 
 type SchemasService struct {
 	RestClient        client.RestClient
 	Conf              config.Config
 	SchemaRegistryUrl string
-	Exporters         []export.Exporter
+	Exporters         []sregexp.SRegExporter
 }
 
 func NewSchemasService(conf config.Config) *SchemasService {
 	restClient := client.New(conf.SchemaRegistry.EndpointUrl, conf.SchemaRegistry.Credentials)
-	var exporters []export.Exporter
+	var exporters []sregexp.SRegExporter
 	for _, v := range conf.Export.Exporters {
-		if v == config.Json {
-			exporters = append(exporters, &export.JsonExporter{})
+		if v == config.Excel {
+			exporters = append(exporters, &sregexp.SRegExcelExporter{})
+		} else if v == config.Json {
+			exporters = append(exporters, &sregexp.SRegJsonExporter{})
 		} else if v == config.Yaml {
-			exporters = append(exporters, &export.YamlExporter{})
+			exporters = append(exporters, &sregexp.SRegYamlExporter{})
 		} else {
 			log.Printf("Schema Registry exporter: Unrecognized exporter: %v \n", v)
 		}
@@ -39,28 +41,26 @@ func NewSchemasService(conf config.Config) *SchemasService {
 
 func (service *SchemasService) Export() {
 	exportExecutors := service.Exporters
-	outputPath := service.Conf.Export.Output + "/_subjects"
+	outputPath := service.Conf.Export.Output + "/" + service.Conf.Cluster
 
 	for _, v := range service.Conf.Export.Resources {
 		if v == config.ExportSchemas {
+			log.Print("Exporting Subjects Info")
 			result := service.GetSubjects()
-			for _, s := range result {
-				done := make(chan bool, len(exportExecutors))
-				for _, v := range exportExecutors {
-					go func(v export.Exporter, s model.SubjectVersion) {
-						out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
-						err := v.Export(s, out)
-						if err != nil {
-							log.Printf("Error: %s\n", err)
-						}
-						done <- true
-					}(v, s)
-				}
-				for i := 0; i < len(exportExecutors); i++ {
-					<-done
-				}
-				close(done)
+			done := make(chan bool, len(exportExecutors))
+			for _, v := range exportExecutors {
+				go func(v sregexp.SRegExporter) {
+					err := v.ExportSubjects(result, outputPath)
+					if err != nil {
+						log.Printf("Error: %s\n", err)
+					}
+					done <- true
+				}(v)
 			}
+			for i := 0; i < len(exportExecutors); i++ {
+				<-done
+			}
+			close(done)
 		}
 	}
 }
@@ -121,6 +121,7 @@ func (service *SchemasService) GetSubjectVersion(subject string, version string)
 	jsonString, _ := json.Marshal(data)
 	subjectVersion := &model.SubjectVersion{}
 	json.Unmarshal([]byte(jsonString), &subjectVersion)
+    
 	return *subjectVersion
 }
 
