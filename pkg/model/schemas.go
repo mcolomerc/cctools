@@ -6,3 +6,7 @@ type SubjectVersion struct {
 	Id      int    `yaml:"id" json:"id"`
 	Schema  string `yaml:"schema" json:"schema"`
 }
+
+type CompatibilityMode struct {
+	Mode string `yaml:"compatibilityLevel" json:"compatibilityLevel"`
+}

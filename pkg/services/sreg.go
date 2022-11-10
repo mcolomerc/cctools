@@ -99,13 +99,25 @@ func (service *SchemasService) GetSubjectVersions(subject string) []model.Subjec
 	}
 	resp := make([]model.SubjectVersion, len(subjectsVersions))
 	done := make(chan model.SubjectVersion, len(subjectsVersions))
-	for _, v := range subjectsVersions {
-		id := int(v.(float64))
+
+	// Generate []int array
+	versions := make([]int, len(subjectsVersions))
+	for i := range subjectsVersions {
+		versions[i] = int(subjectsVersions[i].(float64))
+	}
+
+	var latest int
+	if service.Conf.Export.Schemas.Subject.Version == config.Latest {
+		latest = getLatestVersion(versions)
+		versions = []int{latest}
+	}
+
+	for _, v := range versions {
 		go func(subject string, version string) {
 			done <- service.GetSubjectVersion(subject, version)
-		}(subject, fmt.Sprintf("%d", id))
+		}(subject, fmt.Sprintf("%d", v))
 	}
-	for i := 0; i < len(subjectsVersions); i++ {
+	for i := 0; i < len(versions); i++ {
 		resp = append(resp, <-done)
 	}
 	close(done)
@@ -124,12 +136,16 @@ func (service *SchemasService) GetSubjectVersion(subject string, version string)
 	return *subjectVersion
 }
 
-func (service *SchemasService) GetSubjectConfig(subject string) interface{} {
-	subjectConfig, err := service.RestClient.Get(service.SchemaRegistryUrl + "subjects/" + subject + "/config")
+func (service *SchemasService) GetSubjectConfig(subject string) model.CompatibilityMode {
+	subjectConfig, err := service.RestClient.Get(service.SchemaRegistryUrl + "config/" + subject)
 	if err != nil {
 		log.Printf("Error getting Schema Registry config : %s\n", err)
 	}
-	return subjectConfig
+	data := subjectConfig.(map[string]interface{})
+	jsonString, _ := json.Marshal(data)
+	compatibilityMode := &model.CompatibilityMode{}
+	json.Unmarshal([]byte(jsonString), &compatibilityMode)
+	return *compatibilityMode
 }
 
 func (service *SchemasService) GetSchemas() interface{} {
@@ -138,4 +154,14 @@ func (service *SchemasService) GetSchemas() interface{} {
 		log.Printf("Error getting Schema Registry GetSchemas : %s\n", err)
 	}
 	return subjects
+}
+
+func getLatestVersion(versions []int) int {
+	var max int
+	for i, e := range versions {
+		if i == 0 || e > max {
+			max = e
+		}
+	}
+	return max
 }

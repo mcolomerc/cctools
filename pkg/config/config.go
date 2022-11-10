@@ -31,7 +31,8 @@ type CCloud struct {
 	Environment string `yaml:"environment" validate:"omitempty"`
 }
 
-// Export
+// EXPORT Configuration
+// **********************
 type Export struct {
 	Resources []Resource `yaml:"resources" validate:"required"`
 	Topics    Topics     `yaml:"topics" validate:"omitempty"`
@@ -39,13 +40,16 @@ type Export struct {
 	CFK       CFK        `yaml:"cfk" validate:"omitempty"`
 	Exporters []Exporter `yaml:"exporters"`
 	Output    string     `yaml:"output" validate:"required"`
+	Schemas   Schemas    `yaml:"schemas" validate:"omitempty"`
 }
 
+// Topics export configuration
 type Topics struct {
 	Exclude string `yaml:"exclude"`
 	Include string `yaml:"include"`
 }
 
+// Clink export configuration
 type CLink struct {
 	Name        string `yaml:"name"`
 	Destination string `yaml:"destination"`
@@ -56,11 +60,27 @@ type CLink struct {
 	} `yaml:"sync"`
 }
 
+// CFK export configuration
 type CFK struct {
 	Namespace      string `yaml:"namespace"`
 	KafkaRestClass string `yaml:"kafkarestclass"`
 }
 
+// Schema registry
+type Schemas struct {
+	Subject struct {
+		Version SubjectVersion `yaml:"version"`
+	} `yaml:"subject"`
+}
+
+type SubjectVersion string
+
+const (
+	Latest SubjectVersion = "latest"
+	All    SubjectVersion = "all"
+)
+
+// Resources
 type Resource string
 
 const (
