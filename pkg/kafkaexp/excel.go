@@ -4,7 +4,6 @@ import (
 	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/model"
 	"strconv"
-
 	"github.com/xuri/excelize/v2"
 )
 
@@ -57,13 +56,19 @@ func (e KafkaExcelExporter) ExportTopics(topics []model.Topic, outputPath string
 	f.SetCellValue("Topics", "A1", "Topic")
 	f.SetCellValue("Topics", "B1", "Partitions")
 	f.SetCellValue("Topics", "C1", "Replication Factor")
-	f.SetCellValue("Topics", "D1", "Configs")
+	f.SetCellValue("Topics", "D1", "MinISR")
+	f.SetCellValue("Topics", "E1", "Retention Time MS")
+	f.SetCellValue("Topics", "F1", "Role Bindings")
+	f.SetCellValue("Topics", "G1", "Configs")
 
 	for key, value := range topics {
 		f.SetCellValue("Topics", "A"+strconv.Itoa(key+2), value.Name)
 		f.SetCellValue("Topics", "B"+strconv.Itoa(key+2), value.Partitions)
 		f.SetCellValue("Topics", "C"+strconv.Itoa(key+2), value.ReplicationFactor)
-		f.SetCellValue("Topics", "D"+strconv.Itoa(key+2), getConfigs(value.Configs))
+		f.SetCellValue("Topics", "D"+strconv.Itoa(key+2), value.MinIsr)
+		f.SetCellValue("Topics", "E"+strconv.Itoa(key+2), value.RetentionTime)
+		f.SetCellValue("Topics", "F"+strconv.Itoa(key+2), getRoleBindings(value.RoleBindings))
+		f.SetCellValue("Topics", "G"+strconv.Itoa(key+2), getConfigs(value.Configs))
 	}
 
 	f.SetActiveSheet(index)
@@ -73,6 +78,16 @@ func (e KafkaExcelExporter) ExportTopics(topics []model.Topic, outputPath string
 		return err
 	}
 	return nil
+}
+
+func getRoleBindings(roleBindings []model.RoleBinding) string {
+	var roleBindingsCell string
+
+	for _, value := range roleBindings {
+		roleBindingsCell = roleBindingsCell + value.RoleName + "=" + value.Users.(string) + "\n"
+	}
+
+	return roleBindingsCell
 }
 
 func getConfigs(configs []model.TopicConfig) string {

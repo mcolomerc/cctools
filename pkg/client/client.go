@@ -55,7 +55,6 @@ func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interf
 }
 
 func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
-	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, err
@@ -70,7 +69,6 @@ func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 // Get Request
 // Expect results --> data:[]
 func (kClient *RestClient) GetList(requestURL string) ([]interface{}, error) {
-	log.Printf("Building request %s", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, err
@@ -137,13 +135,13 @@ func getTransport(certificates config.Certificates) *http.Transport {
 	// Load client cert
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		fmt.Printf("error loading cert files")
+		log.Printf("Error loading cert files")
 	}
 
 	// Load CA cert
 	caCert, err := ioutil.ReadFile(caFile)
 	if err != nil {
-		fmt.Printf("Error reading the CA cert")
+		log.Printf("Error reading the CA cert")
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)

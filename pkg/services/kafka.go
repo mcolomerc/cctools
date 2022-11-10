@@ -8,17 +8,22 @@ import (
 	"mcolomerc/cc-tools/pkg/kafkaexp"
 	"mcolomerc/cc-tools/pkg/model"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
+
 type KafkaService struct {
-	KafkaRestClient client.RestClient
-	Conf            config.Config
-	ClusterUrl      string
+	RestClient client.RestClient
+	Conf       config.Config
+	mService   MdsService
+	ClusterUrl string
 	KafkaExporters  []kafkaexp.KafkaExporter
 }
 
 func NewKafkaService(conf config.Config) *KafkaService {
 	restClient := client.New(conf.EndpointUrl, conf.Credentials)
+	mService := NewMdsService(conf)
 	var exporters []kafkaexp.KafkaExporter
 	for _, v := range conf.Export.Exporters {
 		if v == config.Excel {
@@ -36,9 +41,10 @@ func NewKafkaService(conf config.Config) *KafkaService {
 		}
 	}
 	return &KafkaService{
-		KafkaRestClient: *restClient,
-		Conf:            conf,
-		ClusterUrl:      fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.EndpointUrl, conf.Cluster),
+		RestClient: *restClient,
+		mService:   *mService,
+		Conf:       conf,
+		ClusterUrl: fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.EndpointUrl, conf.Cluster),
 		KafkaExporters:  exporters,
 	}
 }
@@ -49,6 +55,7 @@ func (kService *KafkaService) Export() {
 	// var err error
 	for _, v := range kService.Conf.Export.Resources {
 		if v == config.ExportTopics {
+			log.Println("Exporting Topic info")
 			result.Topics = kService.GetTopics()
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
@@ -64,8 +71,10 @@ func (kService *KafkaService) Export() {
 				<-done
 			}
 			close(done)
+			log.Println("Topic info successfully exported")
 		}
 		if v == config.ExportConsumerGroups {
+			log.Println("Exporting Consumer Group Info")
 			cgroups := kService.GetConsumerGroups()
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
@@ -81,12 +90,13 @@ func (kService *KafkaService) Export() {
 				<-done
 			}
 			close(done)
+			log.Println("Consumer Group Info successfully exported")
 		}
 	}
 }
 
 func (kService *KafkaService) GetTopics() []model.Topic {
-	topics, err := kService.KafkaRestClient.GetList(kService.ClusterUrl + "/topics")
+	topics, err := kService.RestClient.GetList(kService.ClusterUrl + "/topics")
 	if err != nil {
 		log.Printf("Error getting Topics : %s\n", err)
 		return nil
@@ -100,8 +110,19 @@ func (kService *KafkaService) GetTopics() []model.Topic {
 			if err != nil {
 				log.Printf("Error getting Topic configs : %s\n", err)
 			} else {
+				t.RetentionTime = getElementFromTopicConfigs(configs, "retention.ms")
+				t.MinIsr = getElementFromTopicConfigs(configs, "min.insync.replicas")
 				t.Configs = configs
 			}
+
+			if kService.mService.Conf.CCloud.Environment == "" {
+				bindings, err := kService.mService.GetResourceBindings("Topic", t.Name)
+				if err != nil {
+					log.Printf("client: error getting topic role bindings for rol and topic: %s\n", err)
+				}
+				t.RoleBindings = bindings
+			}
+			
 			done <- t
 		}(value)
 	}
@@ -129,7 +150,7 @@ func (kService *KafkaService) TopicsExclusion(topics []interface{}) []model.Topi
 }
 
 func (kService *KafkaService) GetTopicConfigs(topic string) ([]model.TopicConfig, error) {
-	configs, err := kService.KafkaRestClient.GetList(kService.ClusterUrl + "/topics/" + topic + "/configs")
+	configs, err := kService.RestClient.GetList(kService.ClusterUrl + "/topics/" + topic + "/configs")
 	if err != nil {
 		log.Printf("Error getting Topic configs : %s\n", err)
 		return nil, err
@@ -146,8 +167,14 @@ func (kService *KafkaService) GetTopicConfigs(topic string) ([]model.TopicConfig
 	return configsTopic, nil
 }
 
+func getElementFromTopicConfigs(topicConfigs []model.TopicConfig, keyToSearch string) string {
+	index := slices.IndexFunc(topicConfigs, func(c model.TopicConfig) bool { return c.Name == keyToSearch })
+
+	return topicConfigs[index].Value.(string)
+}
+
 func (kService *KafkaService) GetConsumerGroups() []model.ConsumerGroup {
-	cGroups, err := kService.KafkaRestClient.GetList(kService.ClusterUrl + "/consumer-groups")
+	cGroups, err := kService.RestClient.GetList(kService.ClusterUrl + "/consumer-groups")
 	if err != nil {
 		fmt.Printf("Error getting consumer-groups : %s\n", err)
 		return nil
@@ -174,7 +201,7 @@ func (kService *KafkaService) GetConsumerGroups() []model.ConsumerGroup {
 	return consumerGroups
 }
 func (kService *KafkaService) GetLag(group string) []model.Lag {
-	lagResp, err := kService.KafkaRestClient.GetList(kService.ClusterUrl + "/consumer-groups/" + group + "/lags")
+	lagResp, err := kService.RestClient.GetList(kService.ClusterUrl + "/consumer-groups/" + group + "/lags")
 	if err != nil {
 		fmt.Printf("Error getting consumer groups lags : %s\n", err)
 		return nil
@@ -196,7 +223,7 @@ func (kService *KafkaService) GetLag(group string) []model.Lag {
 
 }
 func (kService *KafkaService) GetLagSummary(group string) model.LagSummary {
-	lagResp, err := kService.KafkaRestClient.Get(kService.ClusterUrl + "/consumer-groups/" + group + "/lag-summary")
+	lagResp, err := kService.RestClient.Get(kService.ClusterUrl + "/consumer-groups/" + group + "/lag-summary")
 	fmt.Println(lagResp)
 	var lags model.LagSummary
 	if err != nil {
@@ -206,7 +233,7 @@ func (kService *KafkaService) GetLagSummary(group string) model.LagSummary {
 }
 
 func (kService *KafkaService) GetConsumers(group string) []model.Consumer {
-	consumersResp, err := kService.KafkaRestClient.GetList(kService.ClusterUrl + "/consumer-groups/" + group + "/consumers")
+	consumersResp, err := kService.RestClient.GetList(kService.ClusterUrl + "/consumer-groups/" + group + "/consumers")
 	if err != nil {
 		fmt.Printf("Error getting consumers : %s\n", err)
 		return nil

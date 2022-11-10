@@ -28,7 +28,7 @@ type Certificates struct {
 }
 
 type CCloud struct {
-	Environment string `yaml:"environment" validate:"required"`
+	Environment string `yaml:"environment" validate:"omitempty"`
 }
 
 // Export
