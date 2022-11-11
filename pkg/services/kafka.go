@@ -7,19 +7,30 @@ import (
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/kafkaexp"
 	"mcolomerc/cc-tools/pkg/model"
+	"mcolomerc/cc-tools/pkg/util"
 	"strings"
 
 	"golang.org/x/exp/slices"
 )
 
-
 type KafkaService struct {
-	RestClient client.RestClient
-	Conf       config.Config
-	mService   MdsService
-	ClusterUrl string
-	KafkaExporters  []kafkaexp.KafkaExporter
+	RestClient     client.RestClient
+	Conf           config.Config
+	mService       MdsService
+	ClusterUrl     string
+	KafkaExporters []kafkaexp.KafkaExporter
+	Paths          KafkaPaths
 }
+
+type KafkaPaths struct {
+	Topics         string
+	ConsumerGroups string
+}
+
+const (
+	TOPICS_PATH  = "/topics/"
+	CGROUPS_PATH = "/consumer_groups/"
+)
 
 func NewKafkaService(conf config.Config) *KafkaService {
 	restClient := client.New(conf.EndpointUrl, conf.Credentials)
@@ -40,27 +51,33 @@ func NewKafkaService(conf config.Config) *KafkaService {
 			fmt.Printf("Kafka Exporter: Unrecognized exporter: %v \n ", v)
 		}
 	}
+	paths := &KafkaPaths{
+		Topics:         conf.Export.Output + TOPICS_PATH,
+		ConsumerGroups: conf.Export.Output + CGROUPS_PATH,
+	}
 	return &KafkaService{
-		RestClient: *restClient,
-		mService:   *mService,
-		Conf:       conf,
-		ClusterUrl: fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.EndpointUrl, conf.Cluster),
-		KafkaExporters:  exporters,
+		RestClient:     *restClient,
+		mService:       *mService,
+		Conf:           conf,
+		ClusterUrl:     fmt.Sprintf("%s/kafka/v3/clusters/%s", conf.EndpointUrl, conf.Cluster),
+		KafkaExporters: exporters,
+		Paths:          *paths,
 	}
 }
+
 func (kService *KafkaService) Export() {
 	var result model.KafkaServiceResult
 	exportExecutors := kService.KafkaExporters
-	outputPath := kService.Conf.Export.Output + "/" + kService.Conf.Cluster
 	// var err error
 	for _, v := range kService.Conf.Export.Resources {
 		if v == config.ExportTopics {
-			log.Println("Exporting Topic info")
+			log.Println("Exporting Topic Info")
+			util.BuildPath(kService.Paths.Topics)
 			result.Topics = kService.GetTopics()
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
 				go func(v kafkaexp.KafkaExporter) {
-					err := v.ExportTopics(result.Topics, outputPath)
+					err := v.ExportTopics(result.Topics, kService.Paths.Topics)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					}
@@ -75,11 +92,12 @@ func (kService *KafkaService) Export() {
 		}
 		if v == config.ExportConsumerGroups {
 			log.Println("Exporting Consumer Group Info")
+			util.BuildPath(kService.Paths.ConsumerGroups)
 			cgroups := kService.GetConsumerGroups()
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
 				go func(v kafkaexp.KafkaExporter) {
-					err := v.ExportConsumerGroups(cgroups, outputPath)
+					err := v.ExportConsumerGroups(cgroups, kService.Paths.ConsumerGroups)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					}
@@ -122,7 +140,7 @@ func (kService *KafkaService) GetTopics() []model.Topic {
 				}
 				t.RoleBindings = bindings
 			}
-			
+
 			done <- t
 		}(value)
 	}

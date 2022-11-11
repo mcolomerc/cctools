@@ -9,17 +9,27 @@ type Service interface {
 }
 
 type ExportHandler struct {
-	Services []Service
+	Services map[string]Service
 }
 
+const (
+	KAFKA_SERVICE   = "kafka"
+	SCHEMAS_SERVICE = "schemas"
+)
+
 func NewExportHandler(conf config.Config) *ExportHandler {
-	var services []Service
+	services := make(map[string]Service)
 	for _, resource := range conf.Export.Resources {
-		if resource == config.ExportTopics || resource == config.ExportConsumerGroups {
-			services = append(services, NewKafkaService(conf))
+		if resource == config.ExportTopics {
+			services[KAFKA_SERVICE] = NewKafkaService(conf)
+		}
+		if resource == config.ExportConsumerGroups {
+			if _, ok := services[KAFKA_SERVICE]; !ok {
+				services[KAFKA_SERVICE] = NewKafkaService(conf)
+			}
 		}
 		if resource == config.ExportSchemas {
-			services = append(services, NewSchemasService(conf))
+			services[SCHEMAS_SERVICE] = NewSchemasService(conf)
 		}
 	}
 	return &ExportHandler{

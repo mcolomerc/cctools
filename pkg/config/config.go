@@ -68,16 +68,17 @@ type CFK struct {
 
 // Schema registry
 type Schemas struct {
+	Version Version `yaml:"version"`
 	Subject struct {
-		Version SubjectVersion `yaml:"version"`
-	} `yaml:"subject"`
+		Version Version `yaml:"version"`
+	} `yaml:"subjects"`
 }
 
-type SubjectVersion string
+type Version string
 
 const (
-	Latest SubjectVersion = "latest"
-	All    SubjectVersion = "all"
+	Latest Version = "latest"
+	All    Version = "all"
 )
 
 // Resources

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"mcolomerc/cc-tools/pkg/util"
 
 	"os"
 
@@ -57,13 +58,5 @@ func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 
 // Build output folder
 func (c ConfigBuilder) buildOutput() error {
-	if _, err := os.Stat(c.Config.Export.Output); os.IsNotExist(err) {
-		log.Printf("Export output directory: %s not found. Creating...", c.Config.Export.Output)
-		err := os.Mkdir(c.Config.Export.Output, os.ModePerm)
-		if err != nil {
-			log.Fatalf("Export output directory: %s - %v", c.Config.Export.Output, err)
-			return err
-		}
-	}
-	return nil
+	return util.BuildPath(c.Config.Export.Output)
 }

@@ -8,6 +8,7 @@ import (
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/model"
+	"mcolomerc/cc-tools/pkg/util"
 )
 
 type SchemasService struct {
@@ -15,7 +16,18 @@ type SchemasService struct {
 	Conf              config.Config
 	SchemaRegistryUrl string
 	Exporters         []export.Exporter
+	Paths             SRPaths
 }
+
+type SRPaths struct {
+	Schemas  string
+	Subjects string
+}
+
+const (
+	SCHEMAS_PATH = "/schemas"
+	SUBJECT_PATH = "/subjects"
+)
 
 func NewSchemasService(conf config.Config) *SchemasService {
 	restClient := client.New(conf.SchemaRegistry.EndpointUrl, conf.SchemaRegistry.Credentials)
@@ -29,40 +41,84 @@ func NewSchemasService(conf config.Config) *SchemasService {
 			log.Printf("Schema Registry exporter: Unrecognized exporter: %v \n", v)
 		}
 	}
+	paths := &SRPaths{
+		Schemas:  conf.Export.Output + SCHEMAS_PATH,
+		Subjects: conf.Export.Output + SUBJECT_PATH,
+	}
 	return &SchemasService{
 		RestClient:        *restClient,
 		Conf:              conf,
 		SchemaRegistryUrl: fmt.Sprintf("%s/", conf.SchemaRegistry.EndpointUrl),
 		Exporters:         exporters,
+		Paths:             *paths,
 	}
 }
 
-func (service *SchemasService) Export() {
-	exportExecutors := service.Exporters
-	outputPath := service.Conf.Export.Output + "/_subjects"
+func (service *SchemasService) buildExportPaths() {
+	util.BuildPath(service.Paths.Schemas)
+	util.BuildPath(service.Paths.Subjects)
+}
 
+func (service *SchemasService) Export() {
+	service.buildExportPaths()
+	done := make(chan bool, 2)
 	for _, v := range service.Conf.Export.Resources {
 		if v == config.ExportSchemas {
-			result := service.GetSubjects()
-			for _, s := range result {
-				done := make(chan bool, len(exportExecutors))
-				for _, v := range exportExecutors {
-					go func(v export.Exporter, s model.SubjectVersion) {
-						out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
-						err := v.Export(s, out)
-						if err != nil {
-							log.Printf("Error: %s\n", err)
-						}
-						done <- true
-					}(v, s)
-				}
-				for i := 0; i < len(exportExecutors); i++ {
-					<-done
-				}
-				close(done)
-			}
+			go service.exportSubjects(done)
+			go service.exportSchemas(done)
 		}
 	}
+	for i := 0; i < 2; i++ {
+		<-done
+	}
+	close(done)
+}
+
+func (service *SchemasService) exportSchemas(exported chan bool) {
+	exportExecutors := service.Exporters
+	outputPath := service.Paths.Schemas + "/_schema"
+	result := service.GetSchemas()
+	for _, s := range result {
+		done := make(chan bool, len(exportExecutors))
+		for _, v := range exportExecutors {
+			go func(v export.Exporter, s model.Schema) {
+				out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
+				err := v.Export(s, out)
+				if err != nil {
+					log.Printf("Error: %s\n", err)
+				}
+				done <- true
+			}(v, s)
+		}
+		for i := 0; i < len(exportExecutors); i++ {
+			<-done
+		}
+		close(done)
+	}
+	exported <- true
+}
+func (service *SchemasService) exportSubjects(exported chan bool) {
+	exportExecutors := service.Exporters
+	outputPath := service.Paths.Subjects + "/_subjects"
+	result := service.GetSubjects()
+	for _, s := range result {
+		done := make(chan bool, len(exportExecutors))
+		for _, v := range exportExecutors {
+			go func(v export.Exporter, s model.SubjectVersion) {
+				out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
+				err := v.Export(s, out)
+				if err != nil {
+					log.Printf("Error: %s\n", err)
+				}
+				done <- true
+			}(v, s)
+		}
+		for i := 0; i < len(exportExecutors); i++ {
+			<-done
+		}
+		close(done)
+	}
+	exported <- true
 }
 
 func (service *SchemasService) GetConfig() interface{} {
@@ -148,12 +204,45 @@ func (service *SchemasService) GetSubjectConfig(subject string) model.Compatibil
 	return *compatibilityMode
 }
 
-func (service *SchemasService) GetSchemas() interface{} {
-	subjects, err := service.RestClient.Get(service.SchemaRegistryUrl + "schemas")
+func (service *SchemasService) GetSchemas() []model.Schema {
+	schemas, err := service.RestClient.GetList(service.SchemaRegistryUrl + "schemas")
 	if err != nil {
 		log.Printf("Error getting Schema Registry GetSchemas : %s\n", err)
 	}
-	return subjects
+
+	var resp []model.Schema
+	done := make(chan model.Schema, len(schemas))
+	for _, v := range schemas {
+		go func(v interface{}) {
+			data := v.(map[string]interface{})
+			jsonString, _ := json.Marshal(data)
+			schema := &model.Schema{}
+			json.Unmarshal([]byte(jsonString), &schema)
+			done <- *schema
+		}(v)
+	}
+	for i := 0; i < len(schemas); i++ {
+		resp = append(resp, <-done)
+	}
+	close(done)
+	if service.Conf.Export.Schemas.Version == config.Latest {
+		elementMap := make(map[string]model.Schema)
+		for _, v := range resp {
+			if val, ok := elementMap[v.Subject]; ok {
+				if v.Version > val.Version {
+					elementMap[v.Subject] = v
+				}
+			} else {
+				elementMap[v.Subject] = v
+			}
+		}
+		var elementsArray []model.Schema
+		for _, v := range elementMap {
+			elementsArray = append(elementsArray, v)
+		}
+		return elementsArray
+	}
+	return resp
 }
 
 func getLatestVersion(versions []int) int {
