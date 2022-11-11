@@ -10,7 +10,8 @@ import (
 )
 
 type KafkaCfkExporter struct {
-	*export.CfkExporter
+	ParentKafkaExporter
+	export.CfkExporter
 }
 
 type KafkaRestClass struct {
@@ -35,15 +36,17 @@ const (
 )
 
 func NewKafkaCfkExporter(config config.Config) *KafkaCfkExporter {
-	exp := &export.CfkExporter{
-		Namespace:      config.Export.CFK.Namespace,
-		KafkaRestClass: config.Export.CFK.KafkaRestClass,
-	}
 	return &KafkaCfkExporter{
-		CfkExporter: exp,
+		CfkExporter: export.CfkExporter{
+			Namespace:      config.Export.CFK.Namespace,
+			KafkaRestClass: config.Export.CFK.KafkaRestClass,
+		},
 	}
+
 }
+
 func (e KafkaCfkExporter) ExportTopics(topics []model.Topic, outputPath string) error {
+
 	for _, v := range topics {
 		configs := make(map[string]interface{})
 		for _, vc := range v.Configs {
@@ -69,14 +72,10 @@ func (e KafkaCfkExporter) ExportTopics(topics []model.Topic, outputPath string) 
 		if errJson != nil {
 			return errJson
 		}
-		err := ioutil.WriteFile(outputPath+"_topic_"+v.Name+".yml", file, 0644)
+		err := ioutil.WriteFile(outputPath+"/"+v.Name+".yml", file, 0644)
 		if err != nil {
 			return err
 		}
 	}
-	return nil
-}
-
-func (e KafkaCfkExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {
 	return nil
 }

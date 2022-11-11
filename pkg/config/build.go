@@ -48,7 +48,7 @@ func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 		return c.Config, err
 	}
 	//Build Output
-	if err := c.buildOutput(); err != nil {
+	if _, err := c.buildOutput(); err != nil {
 		log.Printf("Can't mount Output folder %v\n", err)
 		return c.Config, err
 	}
@@ -57,6 +57,6 @@ func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 }
 
 // Build output folder
-func (c ConfigBuilder) buildOutput() error {
+func (c ConfigBuilder) buildOutput() (string, error) {
 	return util.BuildPath(c.Config.Export.Output)
 }

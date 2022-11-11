@@ -25,8 +25,8 @@ type SRPaths struct {
 }
 
 const (
-	SCHEMAS_PATH = "/schemas"
-	SUBJECT_PATH = "/subjects"
+	SCHEMAS_PATH = "/schemas/"
+	SUBJECT_PATH = "/subjects/"
 )
 
 func NewSchemasService(conf config.Config) *SchemasService {
@@ -76,13 +76,14 @@ func (service *SchemasService) Export() {
 
 func (service *SchemasService) exportSchemas(exported chan bool) {
 	exportExecutors := service.Exporters
-	outputPath := service.Paths.Schemas + "/_schema"
 	result := service.GetSchemas()
 	for _, s := range result {
 		done := make(chan bool, len(exportExecutors))
 		for _, v := range exportExecutors {
 			go func(v export.Exporter, s model.Schema) {
-				out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
+				pth := fmt.Sprintf("%s%s/", service.Paths.Schemas, v.GetPath())
+				util.BuildPath(pth)
+				out := fmt.Sprintf("%s_%s_%d", pth, s.Subject, s.Version)
 				err := v.Export(s, out)
 				if err != nil {
 					log.Printf("Error: %s\n", err)
@@ -99,13 +100,14 @@ func (service *SchemasService) exportSchemas(exported chan bool) {
 }
 func (service *SchemasService) exportSubjects(exported chan bool) {
 	exportExecutors := service.Exporters
-	outputPath := service.Paths.Subjects + "/_subjects"
 	result := service.GetSubjects()
 	for _, s := range result {
 		done := make(chan bool, len(exportExecutors))
 		for _, v := range exportExecutors {
 			go func(v export.Exporter, s model.SubjectVersion) {
-				out := fmt.Sprintf("%s_%s_%d", outputPath, s.Subject, s.Version)
+				pth := fmt.Sprintf("%s%s/", service.Paths.Subjects, v.GetPath())
+				util.BuildPath(pth)
+				out := fmt.Sprintf("%s%s_%d", pth, s.Subject, s.Version)
 				err := v.Export(s, out)
 				if err != nil {
 					log.Printf("Error: %s\n", err)

@@ -4,16 +4,18 @@ import (
 	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/model"
 	"strconv"
+
 	"github.com/xuri/excelize/v2"
 )
 
 type KafkaExcelExporter struct {
-	*export.ExcelExporter
+	ParentKafkaExporter
+	export.ExcelExporter
 }
 
 func NewKafkaExcelExporter() *KafkaExcelExporter {
 	return &KafkaExcelExporter{
-		ExcelExporter: &export.ExcelExporter{},
+		ExcelExporter: export.ExcelExporter{},
 	}
 }
 

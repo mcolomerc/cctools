@@ -77,7 +77,9 @@ func (kService *KafkaService) Export() {
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
 				go func(v kafkaexp.KafkaExporter) {
-					err := v.ExportTopics(result.Topics, kService.Paths.Topics)
+					pth := fmt.Sprintf("%s%s/", kService.Paths.Topics, v.GetPath())
+					util.BuildPath(pth)
+					err := v.ExportTopics(result.Topics, pth)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					}
@@ -97,7 +99,9 @@ func (kService *KafkaService) Export() {
 			done := make(chan bool, len(exportExecutors))
 			for _, v := range exportExecutors {
 				go func(v kafkaexp.KafkaExporter) {
-					err := v.ExportConsumerGroups(cgroups, kService.Paths.ConsumerGroups)
+					pth := fmt.Sprintf("%s%s/", kService.Paths.ConsumerGroups, v.GetPath())
+					util.BuildPath(pth)
+					err := v.ExportConsumerGroups(cgroups, pth)
 					if err != nil {
 						fmt.Printf("Error: %s\n", err)
 					}

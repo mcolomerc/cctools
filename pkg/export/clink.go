@@ -16,6 +16,10 @@ const (
 	SH_HEADER = "#!/bin/bash"
 )
 
+func (e ClinkExporter) GetPath() string {
+	return "clink"
+}
+
 func (e ClinkExporter) Export(res interface{}, outputPath string) error {
 	return nil
 }
