@@ -8,4 +8,5 @@ import (
 type SRegExporter interface {
 	export.Exporter
 	ExportSubjects(schema []model.SubjectVersion, outputPath string) error
+	ExportSchemas(schemas []model.Schema, outputPath string) error
 }

@@ -6,8 +6,8 @@ import (
 	"log"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
-	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/model"
+	"mcolomerc/cc-tools/pkg/sregexp"
 	"mcolomerc/cc-tools/pkg/util"
 )
 
@@ -15,7 +15,7 @@ type SchemasService struct {
 	RestClient        client.RestClient
 	Conf              config.Config
 	SchemaRegistryUrl string
-	Exporters         []export.Exporter
+	SRegExporters     []sregexp.SRegExporter
 	Paths             SRPaths
 }
 
@@ -31,12 +31,14 @@ const (
 
 func NewSchemasService(conf config.Config) *SchemasService {
 	restClient := client.New(conf.SchemaRegistry.EndpointUrl, conf.SchemaRegistry.Credentials)
-	var exporters []export.Exporter
+	var exporters []sregexp.SRegExporter
 	for _, v := range conf.Export.Exporters {
 		if v == config.Json {
-			exporters = append(exporters, &export.JsonExporter{})
+			exporters = append(exporters, sregexp.NewSRegJsonExporter())
 		} else if v == config.Yaml {
-			exporters = append(exporters, &export.YamlExporter{})
+			exporters = append(exporters, sregexp.NewSRegYamlExporter())
+		} else if v == config.Excel {
+			exporters = append(exporters, sregexp.NewSRegExcelExporter())
 		} else {
 			log.Printf("Schema Registry exporter: Unrecognized exporter: %v \n", v)
 		}
@@ -49,7 +51,7 @@ func NewSchemasService(conf config.Config) *SchemasService {
 		RestClient:        *restClient,
 		Conf:              conf,
 		SchemaRegistryUrl: fmt.Sprintf("%s/", conf.SchemaRegistry.EndpointUrl),
-		Exporters:         exporters,
+		SRegExporters:     exporters,
 		Paths:             *paths,
 	}
 }
@@ -75,51 +77,45 @@ func (service *SchemasService) Export() {
 }
 
 func (service *SchemasService) exportSchemas(exported chan bool) {
-	exportExecutors := service.Exporters
+	exportExecutors := service.SRegExporters
 	result := service.GetSchemas()
-	for _, s := range result {
-		done := make(chan bool, len(exportExecutors))
-		for _, v := range exportExecutors {
-			go func(v export.Exporter, s model.Schema) {
-				pth := fmt.Sprintf("%s%s/", service.Paths.Schemas, v.GetPath())
-				util.BuildPath(pth)
-				out := fmt.Sprintf("%s_%s_%d", pth, s.Subject, s.Version)
-				err := v.Export(s, out)
-				if err != nil {
-					log.Printf("Error: %s\n", err)
-				}
-				done <- true
-			}(v, s)
-		}
-		for i := 0; i < len(exportExecutors); i++ {
-			<-done
-		}
-		close(done)
+	done := make(chan bool, len(exportExecutors))
+	for _, v := range exportExecutors {
+		go func(v sregexp.SRegExporter, s []model.Schema) {
+			pth := fmt.Sprintf("%s%s/", service.Paths.Schemas, v.GetPath())
+			util.BuildPath(pth)
+			err := v.ExportSchemas(s, pth)
+			if err != nil {
+				log.Printf("Error: %s\n", err)
+			}
+			done <- true
+		}(v, result)
 	}
+	for i := 0; i < len(exportExecutors); i++ {
+		<-done
+	}
+	close(done)
 	exported <- true
 }
 func (service *SchemasService) exportSubjects(exported chan bool) {
-	exportExecutors := service.Exporters
+	exportExecutors := service.SRegExporters
 	result := service.GetSubjects()
-	for _, s := range result {
-		done := make(chan bool, len(exportExecutors))
-		for _, v := range exportExecutors {
-			go func(v export.Exporter, s model.SubjectVersion) {
-				pth := fmt.Sprintf("%s%s/", service.Paths.Subjects, v.GetPath())
-				util.BuildPath(pth)
-				out := fmt.Sprintf("%s%s_%d", pth, s.Subject, s.Version)
-				err := v.Export(s, out)
-				if err != nil {
-					log.Printf("Error: %s\n", err)
-				}
-				done <- true
-			}(v, s)
-		}
-		for i := 0; i < len(exportExecutors); i++ {
-			<-done
-		}
-		close(done)
+	done := make(chan bool, len(exportExecutors))
+	for _, v := range exportExecutors {
+		go func(v sregexp.SRegExporter, s []model.SubjectVersion) {
+			pth := fmt.Sprintf("%s%s/", service.Paths.Subjects, v.GetPath())
+			util.BuildPath(pth)
+			err := v.ExportSubjects(s, pth)
+			if err != nil {
+				log.Printf("Error: %s\n", err)
+			}
+			done <- true
+		}(v, result)
 	}
+	for i := 0; i < len(exportExecutors); i++ {
+		<-done
+	}
+	close(done)
 	exported <- true
 }
 
