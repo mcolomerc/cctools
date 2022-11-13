@@ -10,6 +10,10 @@ type Metadata struct {
 	Namespace string `yaml:"namespace"`
 }
 
+func (e CfkExporter) GetPath() string {
+	return "cfk"
+}
+
 func (e CfkExporter) Export(res interface{}, outputPath string) error {
 	return nil
 }

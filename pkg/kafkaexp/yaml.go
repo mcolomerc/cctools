@@ -6,6 +6,7 @@ import (
 )
 
 type KafkaYamlExporter struct {
+	ParentKafkaExporter
 	export.YamlExporter
 }
 
@@ -16,7 +17,7 @@ func NewKafkaYamlExporter() *KafkaYamlExporter {
 }
 
 func (e KafkaYamlExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-	return e.YamlExporter.Export(topics, outputPath+"_topics")
+	return e.YamlExporter.Export(topics, outputPath+"topics")
 }
 
 func (e KafkaYamlExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {

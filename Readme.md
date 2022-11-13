@@ -245,16 +245,27 @@ export:
     include: _confluent
 ```
 
+#### Schemas
+
+Configure Subject export: `all` subject versions or only the `latest` version.
+
+```yaml
+export:
+  schemas: 
+    subject:
+      version: latest | all # default: all
+```
+
 #### Cluster Link
 
 Configuration requires:
 
- * name: Cluster Link name `string`
- * destination: Destination cluster ID `string`
- * autocreate: Autocreate topics `true|false`
- * sync: 
-    * offset: Offset sync `true|false`
-    * acl: Acl Sync `true|false` 
+ * `name`: Cluster Link name `string`
+ * `destination`: Destination cluster ID `string`
+ * `autocreate`: Autocreate topics `true|false`
+ * `sync`: 
+    * `offset`: Offset sync `true|false`
+    * `acl`: Acl Sync `true|false` 
 
 
 ```yaml
@@ -274,8 +285,8 @@ export:
 
 Configuration requires:
 
-* namespace: target namespace `string`
-* kafkarestaclass: Kafka Rest Class name `string`
+* `namespace`: target namespace `string`
+* `kafkarestaclass`: Kafka Rest Class name `string`
 
 ```yaml
 export:
@@ -285,6 +296,8 @@ export:
   exporters:
   - cfk  
 ```
+
+
 
 ---
 

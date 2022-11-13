@@ -6,6 +6,7 @@ import (
 )
 
 type KafkaJsonExporter struct {
+	ParentKafkaExporter
 	export.JsonExporter
 }
 
@@ -16,7 +17,7 @@ func NewKafkaJsonExporter() *KafkaJsonExporter {
 }
 
 func (e KafkaJsonExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-	return e.JsonExporter.Export(topics, outputPath+"_topics")
+	return e.JsonExporter.Export(topics, outputPath+"topics")
 }
 
 func (e KafkaJsonExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {

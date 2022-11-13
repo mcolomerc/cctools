@@ -10,7 +10,8 @@ import (
 )
 
 type KafkaClinkExporter struct {
-	*export.ClinkExporter
+	ParentKafkaExporter
+	export.ClinkExporter
 }
 
 const (
@@ -18,7 +19,7 @@ const (
 )
 
 func NewKafkaClinkExporter(conf config.Config) *KafkaClinkExporter {
-	exp := &export.ClinkExporter{
+	exp := export.ClinkExporter{
 		LinkName:             conf.Export.CLink.Name,
 		SourceClusterId:      conf.Cluster,
 		BootstrapServer:      conf.BootstrapServer,
@@ -132,10 +133,6 @@ func (e KafkaClinkExporter) buildTopicMirror(topic string) string {
 }
 func (e KafkaClinkExporter) buildPromoteMirror(topic string) string {
 	return fmt.Sprintf(`confluent kafka mirror promote %s --cluster %s --link %s `, topic, e.DestinationClusterId, e.LinkName)
-}
-
-func (e KafkaClinkExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {
-	return nil
 }
 
 func (e KafkaClinkExporter) buildCleanup(outputPath string, done chan bool) error {
