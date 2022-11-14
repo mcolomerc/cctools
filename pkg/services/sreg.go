@@ -3,9 +3,9 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/log"
 	"mcolomerc/cc-tools/pkg/model"
 	"mcolomerc/cc-tools/pkg/sregexp"
 	"mcolomerc/cc-tools/pkg/util"
@@ -40,7 +40,7 @@ func NewSchemasService(conf config.Config) *SchemasService {
 		} else if v == config.Excel {
 			exporters = append(exporters, sregexp.NewSRegExcelExporter())
 		} else {
-			log.Printf("Schema Registry exporter: Unrecognized exporter: %v \n", v)
+			log.Info("Schema Registry exporter: Unrecognized exporter: ", v)
 		}
 	}
 	paths := &SRPaths{
@@ -62,6 +62,7 @@ func (service *SchemasService) buildExportPaths() {
 }
 
 func (service *SchemasService) Export() {
+	log.Debug("Exporting from Schema Registry...")
 	service.buildExportPaths()
 	done := make(chan bool, 2)
 	for _, v := range service.Conf.Export.Resources {
@@ -74,6 +75,7 @@ func (service *SchemasService) Export() {
 		<-done
 	}
 	close(done)
+	log.Info("Schema registry exported")
 }
 
 func (service *SchemasService) exportSchemas(exported chan bool) {
@@ -83,10 +85,11 @@ func (service *SchemasService) exportSchemas(exported chan bool) {
 	for _, v := range exportExecutors {
 		go func(v sregexp.SRegExporter, s []model.Schema) {
 			pth := fmt.Sprintf("%s%s/", service.Paths.Schemas, v.GetPath())
+			log.Debug("Building path :: ", pth)
 			util.BuildPath(pth)
 			err := v.ExportSchemas(s, pth)
 			if err != nil {
-				log.Printf("Error: %s\n", err)
+				log.Error("Error: %s\n", err)
 			}
 			done <- true
 		}(v, result)
@@ -104,10 +107,11 @@ func (service *SchemasService) exportSubjects(exported chan bool) {
 	for _, v := range exportExecutors {
 		go func(v sregexp.SRegExporter, s []model.SubjectVersion) {
 			pth := fmt.Sprintf("%s%s/", service.Paths.Subjects, v.GetPath())
+			log.Debug("Building path :: ", pth)
 			util.BuildPath(pth)
 			err := v.ExportSubjects(s, pth)
 			if err != nil {
-				log.Printf("Error: %s\n", err)
+				log.Error("Error: %s\n", err)
 			}
 			done <- true
 		}(v, result)
@@ -122,7 +126,7 @@ func (service *SchemasService) exportSubjects(exported chan bool) {
 func (service *SchemasService) GetConfig() interface{} {
 	config, err := service.RestClient.Get(service.SchemaRegistryUrl + "config")
 	if err != nil {
-		log.Printf("Error getting Schema Registry config : %s\n", err)
+		log.Error("Error getting Schema Registry config : %s\n", err)
 	}
 	return config
 }
@@ -130,7 +134,7 @@ func (service *SchemasService) GetConfig() interface{} {
 func (service *SchemasService) GetSubjects() []model.SubjectVersion {
 	subjects, err := service.RestClient.GetList(service.SchemaRegistryUrl + "subjects")
 	if err != nil {
-		log.Printf("Error getting Schema Registry config : %s\n", err)
+		log.Error("Error getting Schema Registry config : %s\n", err)
 	}
 	resp := make([]model.SubjectVersion, len(subjects))
 	done := make(chan []model.SubjectVersion, len(subjects))
@@ -149,7 +153,7 @@ func (service *SchemasService) GetSubjects() []model.SubjectVersion {
 func (service *SchemasService) GetSubjectVersions(subject string) []model.SubjectVersion {
 	subjectsVersions, err := service.RestClient.GetList(service.SchemaRegistryUrl + "subjects/" + subject + "/versions")
 	if err != nil {
-		log.Printf("Error getting Schema Registry GetSubjectVersions : %s\n", err)
+		log.Error("Error getting Schema Registry GetSubjectVersions : %s\n", err)
 	}
 	resp := make([]model.SubjectVersion, len(subjectsVersions))
 	done := make(chan model.SubjectVersion, len(subjectsVersions))
@@ -181,7 +185,7 @@ func (service *SchemasService) GetSubjectVersions(subject string) []model.Subjec
 func (service *SchemasService) GetSubjectVersion(subject string, version string) model.SubjectVersion {
 	subjVersion, err := service.RestClient.Get(service.SchemaRegistryUrl + "subjects/" + subject + "/versions/" + version)
 	if err != nil {
-		log.Printf("Error getting Schema Registry GetSubjectVersion : %s\n", err)
+		log.Error("Error getting Schema Registry GetSubjectVersion : %s\n", err)
 	}
 	data := subjVersion.(map[string]interface{})
 	jsonString, _ := json.Marshal(data)
@@ -193,7 +197,7 @@ func (service *SchemasService) GetSubjectVersion(subject string, version string)
 func (service *SchemasService) GetSubjectConfig(subject string) model.CompatibilityMode {
 	subjectConfig, err := service.RestClient.Get(service.SchemaRegistryUrl + "config/" + subject)
 	if err != nil {
-		log.Printf("Error getting Schema Registry config : %s\n", err)
+		log.Error("Error getting Schema Registry config : %s\n", err)
 	}
 	data := subjectConfig.(map[string]interface{})
 	jsonString, _ := json.Marshal(data)
@@ -205,7 +209,7 @@ func (service *SchemasService) GetSubjectConfig(subject string) model.Compatibil
 func (service *SchemasService) GetSchemas() []model.Schema {
 	schemas, err := service.RestClient.GetList(service.SchemaRegistryUrl + "schemas")
 	if err != nil {
-		log.Printf("Error getting Schema Registry GetSchemas : %s\n", err)
+		log.Error("Error getting Schema Registry GetSchemas : %s\n", err)
 	}
 
 	var resp []model.Schema
