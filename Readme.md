@@ -192,7 +192,7 @@ export:
     - topics
 ```
 
-See [[Topics]].
+See [Topics](docs/Topics.md).
 
 * Export Consumer Groups information: ```consumer_groups```
 
@@ -210,7 +210,7 @@ export:
     - schemas
 ```
 
-See [[Schemas]]
+See [Schemas](docs/Schemas.md)
 
 ---
 
@@ -240,8 +240,8 @@ export:
 * JSON: `json`
 * YAML: `yaml`
 * Excel: `excel`
-* [[CLinkExporter]]: `clink`
-* [[CFKExporter]]: `cfk`
+* [CLinkExporter](docs/CLinkExporter.md): `clink`
+* [CFKExporter](docs/CFKExporter.md): `cfk`
 
 Example: Use the following configuration to export to *YAML* format only:
 
@@ -259,7 +259,8 @@ export:
   - excel
   - yaml 
   - json  
-``` 
+```
+
 ---
 
 # Sources
