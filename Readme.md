@@ -420,6 +420,10 @@ Output: The export will generate:
 
 # Sources
 
+## DEBUG
+
+Enable Debug mode:`LOG=DEBUG` for extra logging.
+
 ## Releaser
 
 https://goreleaser.com/install/

@@ -3,9 +3,9 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/log"
 	"mcolomerc/cc-tools/pkg/model"
 )
 
@@ -34,7 +34,7 @@ func (mService *MdsService) GetResourceBindings(resourceType string, resourceNam
 	for _, role := range roles {
 		roleBindings, err := mService.getResourceBindingsForRole(resourceType, resourceName, role)
 		if err != nil {
-			log.Printf("client: error getting topic role bindings for rol and topic: %s\n", err)
+			log.Error("client: error getting topic role bindings for rol and topic: %s\n", err)
 			return nil, err
 		}
 		topicBindings = append(topicBindings, roleBindings...)

@@ -111,4 +111,5 @@ const (
 	Json  Exporter = "json"
 	Clink Exporter = "clink"
 	Cfk   Exporter = "cfk"
+	Hcl   Exporter = "hcl"
 )
