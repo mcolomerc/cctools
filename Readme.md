@@ -5,15 +5,32 @@
 
 This CLI uses Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters. 
 
-It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool.
+It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool. 
 
 <img src="./docs/image.png" width="500">
 
-## Install
+
+* [Installation](#installation)
+  
+* [Configuration](#configuration)
+ 
+  * [Commands](#commands)
+ 
+  * [Connection and Credentials](#connection)
+
+  * [Output](#output)
+
+  * [Resources](#resources)
+
+  * [Exporters](#exporters)
+  
+
+## Installation
 
 Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download your OS distribution.
 
 ## Configuration
+
 The tool needs a configuration file (yml).
 
 Configuration file: ```--config config.yml```
@@ -43,8 +60,10 @@ ccloud:
 * Rest Api URL: ```endpointUrl: <REST_ENDPOINT>```
 
 * Credentials: 
-  - ```key: <USER>``` or Confluent Cloud API_KEY. 
-  - ```secret: <PASSWORD>``` or Confluent Cloud API_SECRET  
+  
+  * ```key: <USER>``` or Confluent Cloud API_KEY.
+  
+  * ```secret: <PASSWORD>``` or Confluent Cloud API_SECRET  
 
 ```yaml
 cluster: <CLUSTER_ID>
@@ -60,10 +79,13 @@ credentials:
 
 If certiticates are needed:
 
-  - Certificates: 
-    - certFile: Certificate file path
-    - keyFile: Key file path
-    - CAFile: CA file path
+* Certificates:
+   
+  * `certFile`: Certificate file path
+  
+  * `keyFile`: Key file path
+  
+  * `CAFile`: CA file path
 
 
 ```yaml
@@ -83,7 +105,7 @@ credentials:
     CAFile: <CA File path>
 ```
 
-#### Schema Registry 
+#### **Schema Registry** 
 
 Schema Registry connection configuration:
 
@@ -99,10 +121,13 @@ schemaRegistry:
 
 If certiticates are needed:
 
-  - Certificates: 
-    - certFile: Certificate file path
-    - keyFile: Key file path
-    - CAFile: CA file path
+* Certificates:
+
+  * `certFile`: Certificate file path
+  
+  * `keyFile`: Key file path
+  
+  * `CAFile`: CA file path
 
 ```yaml
 #Schema Registry 
@@ -118,23 +143,25 @@ schemaRegistry:
     CAFile: <CA File path>
 ```
 
+---
+
 ## Commands
 
 `export`
 
 Configuration:
 
- * Resources to export, a list of resources to export, available values: `topics`, `consumer_groups`, `schemas`.  
- * Output path
- * Exporter configuration 
-   * Specific configuration for each exporter (See Exporters)
- * List of Exporters 
-   * List of export formats: 
-     * `json`: Json files
-     * `yaml`: YAML files
-     * `excel`: Excel files
-     * `clink`: Cluster Linking commands (.sh and configuration files) 
-     * `cfk`: Confluent For Kubernetes Custom Resources definitions. (YAML for Kubernetes)
+* Resources to export, a list of resources to export, available values: `topics`, `consumer_groups`, `schemas`.  
+* Output path
+* Exporter configuration 
+  * Specific configuration for each exporter (See Exporters)
+* List of Exporters 
+  * List of export formats: 
+    * `json`: Json files
+    * `yaml`: YAML files
+    * `excel`: Excel files
+    * `clink`: Cluster Linking commands (.sh and configuration files) 
+    * `cfk`: Confluent For Kubernetes Custom Resources definitions. (YAML for Kubernetes)
 
 ```yaml
 export:
@@ -151,7 +178,9 @@ export:
   output: output #Output Path
 ``` 
 
-**Resources**
+---
+
+### Resources
 
 Required: Configure resources to export.
 
@@ -162,6 +191,8 @@ export:
   resources: 
     - topics
 ```
+
+See [[Topics]].
 
 * Export Consumer Groups information: ```consumer_groups```
 
@@ -179,9 +210,11 @@ export:
     - schemas
 ```
 
-**TBD**: Schema registry exporters only supports JSON and YAML Exporters.
+See [[Schemas]]
 
-**Output**
+---
+
+### Output
 
 Configure the output folder, it will be created if it does not exist.
 
@@ -192,118 +225,23 @@ export:
   output: output 
 ```
 
-### Exporter configuration
+1. Each `resource` will create a folder inside the `output` target.
 
-#### Topics
+2. Each exporter will create a folder inside the `resource` folder.
 
-**Exclude** 
-
-Exclude Topics by name containing ```string```.
-
-```yaml
-export:
-  topics:
-    exclude: _confluent
-```
-
-**Include** 
-
-Include only Topics by name containing ```string```.
-
-```yaml
-export:
-  topics: 
-    include: _confluent
-```
-
-**Exclude & Include**
-
-```include``` can be used with ```exclude``` rules.  
-
-Example: Exclude all ```_confluent``` topics but include ```_confluent_balancer``` topics.
-
-```yaml
-export:
-  topics:
-    exclude: _confluent
-    include: _confluent_balancer
-```
-
-Export result:  
-
-* *_confluent_balancer_api_state*
-* *_confluent_balancer_broker_samples*
-* *_confluent_balancer_partition_samples*
-* *my-topic*
-
-Consider that ```exclude``` will be applied first, so with the following configuration, ```exclude``` will not take effect since all the ```_confluent``` topics will be included by the ```include```.
-
-```yaml
-export:
-  topics:
-    exclude: _confluent_balancer
-    include: _confluent
-```
-
-#### Schemas
-
-Configure Subject export: `all` subject versions or only the `latest` version.
-
-```yaml
-export:
-  schemas: 
-    subject:
-      version: latest | all # default: all
-```
-
-#### Cluster Link
-
-Configuration requires:
-
- * `name`: Cluster Link name `string`
- * `destination`: Destination cluster ID `string`
- * `autocreate`: Autocreate topics `true|false`
- * `sync`: 
-    * `offset`: Offset sync `true|false`
-    * `acl`: Acl Sync `true|false` 
-
-
-```yaml
-export:
-  clink:
-    name: <CLUSTER_LINK_NAME>
-    destination: <DESTINATION_CLUSTER_ID>
-    autocreate: true | false
-    sync: 
-      offset: true | false
-      acl: true | false 
-  exporters:  
-  - clink 
-```
-
-#### Confluent For Kubernetes 
-
-Configuration requires:
-
-* `namespace`: target namespace `string`
-* `kafkarestaclass`: Kafka Rest Class name `string`
-
-```yaml
-export:
-  cfk:
-    namespace: confluent  
-    kafkarestclass: kafka 
-  exporters:
-  - cfk  
-```
-
-
+**Example**: Exporting Topics to JSON will generate: `output/topics/json/topics.json`
 
 ---
 
-### Exporters
+### **Exporters** 
 
 ```cctools export``` supports different exporters by configuration: `json`, `yaml`,`excel`, `clink`, `cfk`
+
+* JSON: `json`
+* YAML: `yaml`
+* Excel: `excel`
+* [[CLinkExporter]]: `clink`
+* [[CFKExporter]]: `cfk`
 
 Example: Use the following configuration to export to *YAML* format only:
 
@@ -321,104 +259,14 @@ export:
   - excel
   - yaml 
   - json  
-```
-
-**```json```**
-
-OutPut: (<output_path>/<cluster_ID>_<resource>.json)
-
-Output Sample for ```topics``` resource:
-
-```json
-[
- {
-  "Name": "_confluent-command",
-  "Partitions": 1,
-  "ReplicationFactor": 3,
-  "Configs": [
-   {
-    "Name": "cleanup.policy",
-    "Value": "compact"
-   },
-   {
-    "Name": "compression.type",
-    "Value": "producer"
-   },
-   ...
-```
-
-**```excel```**
-
-OutPut: (<output_path>/<cluster_ID>_<resource>.xlsx)
-
-Output Sample for ```topics``` resource:
-
-| Topic	| Partitions |	Replication Factor | Configs |
-|-------|------------|---------------------|---------|
-|_confluent-command |	1 |	3 |	cleanup.policy=compact compression.type=producer delete.retention.ms=86400000 ...|
-| my-topic | 6 | 3 | cleanup.policy=delete compression.type=producer delete.retention.ms=86400000 ...| 
-| ... | | | | 
-
-
-
-**```yaml```**
-
-OutPut: (<output_path>/<cluster_ID>_<resource>.yaml)
-
-Output Sample for ```topics``` resource:
-
-```yaml
-- name: _confluent-command
-  partitions: 1
-  replicationfactor: 3
-  configs:
-  - name: cleanup.policy
-    value: compact
-  - name: compression.type
-    value: producer
-  ...
-```
-
-**`cfk`**
-
-From the selected resources export to [Confluent For Kubernetes (CFK) Custom Resources](https://docs.confluent.io/operator/current/co-manage-topics.html#create-ak-topic) `KafkaTopic`. 
-
-Output: Exporter will create a <output_path>/<clusterid>_<resource>_<topicName>.yml file for each Topic. 
-
-Example:
-
-```yml
-apiVersion: platform.confluent.io/v1beta1
-kind: KafkaTopic
-metadata:
-  name: user_transactions
-  namespace: confluent
-spec:
-  replicas: 3
-  partitionCount: 6
-  configs:
-    cleanup.policy: delete
-    compression.type: producer
-    ...
-  kafkaRestClassRef:
-    name: kafka
-
-```
-
-**```clink```**
-
-From the selected `topics` export [Confluent Cloud Cluster Link](https://docs.confluent.io/cloud/current/multi-cloud/overview.html) scripts and configuration.
-
-Output: The export will generate:
-
-* Cluster Link creation script (.sh), including topic mirrors from selected `topics` if `autocreate` is `false`
-* Topic promotion script (.sh)
-* Clean up script (.sh)
-* Cluster Link configuration file (.properties), including `auto.create.mirror.topics.filters` from selected `topics`
-
+``` 
 ---
 
 # Sources
+
+## Execute
+
+`go run main.go  export  --config config_cloud.yml`
 
 ## DEBUG
 
