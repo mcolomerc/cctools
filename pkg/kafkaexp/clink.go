@@ -179,7 +179,7 @@ func (e KafkaClinkExporter) buildProperties(topics []model.Topic, outputPath str
 		for _, v := range topics {
 			filters = filters + fmt.Sprintf(`{"name": "%s",  "patternType": "LITERAL",  "filterType": "INCLUDE"}, `, v.Name)
 		}
-		filters = filters + `] } \n`
+		filters = filters + `] } `
 		lines = append(lines, filters)
 	}
 
