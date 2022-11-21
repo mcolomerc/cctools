@@ -235,13 +235,14 @@ export:
 
 ### **Exporters** 
 
-```cctools export``` supports different exporters by configuration: `json`, `yaml`,`excel`, `clink`, `cfk`
+```cctools export``` supports different exporters by configuration: `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
 
 * JSON: `json`
 * YAML: `yaml`
 * Excel: `excel`
 * [CLinkExporter](docs/CLinkExporter.md): `clink`
 * [CFKExporter](docs/CFKExporter.md): `cfk`
+* [HCLExporter](docs/HCLExporter.md): `hcl`
 
 Example: Use the following configuration to export to *YAML* format only:
 

@@ -154,4 +154,30 @@ Output: The export will generate:
 * Clean up script (.sh)
 * Cluster Link configuration file (.properties), including `auto.create.mirror.topics.filters` from selected `topics`
 
- 
+**```hcl```**
+
+## Export Topics
+
+Exporting Topics to HCL will generate: `output/topics/tfvars/topics.tfvars`.
+
+```js
+environment = "<ENV_ID>"
+
+cluster = "<CLUSTER_ID>"
+
+rbac_enabled = false
+
+serv_account = {
+  name = "<SERVICE_ACCOUNT>"
+  role = "CloudClusterAdmin"
+}
+topics = [{
+  name       = "orders"
+  partitions = 12
+  config = {
+    "cleanup.policy"                          = "delete"
+    "compression.type"                        = "producer"
+    ...
+```
+
+The output could be used with [Terraform Topics Module](https://github.com/mcolomerc/terraform-confluent-topics) to create topics on Confluent cloud destination cluster. 
