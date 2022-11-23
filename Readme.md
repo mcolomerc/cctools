@@ -162,6 +162,7 @@ Configuration:
     * `excel`: Excel files
     * `clink`: Cluster Linking commands (.sh and configuration files) 
     * `cfk`: Confluent For Kubernetes Custom Resources definitions. (YAML for Kubernetes)
+    * `hcl`: Terraform exporter
 
 ```yaml
 export:
