@@ -10,19 +10,22 @@ It allows to export resources into different formats, that could be used as inpu
 <img src="./docs/image.png" width="500">
 
 
-* [Installation](#installation)
-  
-* [Configuration](#configuration)
- 
-  * [Commands](#commands)
- 
-  * [Connection and Credentials](#connection)
-
-  * [Output](#output)
-
-  * [Resources](#resources)
-
-  * [Exporters](#exporters)
+- [Confluent Migration Tools](#confluent-migration-tools)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [Connection](#connection)
+      - [**Schema Registry**](#schema-registry)
+  - [Commands](#commands)
+    - [Resources](#resources)
+    - [Output](#output)
+    - [**Exporters**](#exporters)
+    - [External resources](#external-resources)
+- [Sources](#sources)
+  - [Execute](#execute)
+  - [DEBUG](#debug)
+  - [Releaser](#releaser)
+    - [Binary](#binary)
+    - [CI/CD](#cicd)
   
 
 ## Installation
@@ -262,6 +265,28 @@ export:
   - yaml 
   - json  
 ```
+
+### External resources
+
+Add external Git repositories to the `output`. 
+
+Provide a map as `target_dir`: `git url`.
+
+The repository will be cloned into `output/target_dir`
+
+```yaml
+export:
+  output: output 
+  git:
+    scripts: https://github.com/mddunn/ccloud-migration-scripts
+    terraform: https://github.com/mcolomerc/terraform-confluent-topics
+```
+
+In the example above:  
+
+- The `https://github.com/mddunn/ccloud-migration-scripts` repository will be cloned into `output/scripts`
+
+- The `https://github.com/mcolomerc/terraform-confluent-topics` repository will be cloned into `output/terraform`
 
 ---
 

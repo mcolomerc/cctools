@@ -2,6 +2,7 @@ package services
 
 import (
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/log"
 )
 
 type Service interface {
@@ -15,6 +16,7 @@ type ExportHandler struct {
 const (
 	KAFKA_SERVICE   = "kafka"
 	SCHEMAS_SERVICE = "schemas"
+	GIT_SERVICE     = "git"
 )
 
 func NewExportHandler(conf config.Config) *ExportHandler {
@@ -31,6 +33,11 @@ func NewExportHandler(conf config.Config) *ExportHandler {
 		if resource == config.ExportSchemas {
 			services[SCHEMAS_SERVICE] = NewSchemasService(conf)
 		}
+	}
+	log.Debug("Check Git repositories...", len(conf.Export.Git))
+	log.Debug("Check Git repositories...", conf.Export.Git)
+	if len(conf.Export.Git) > 0 {
+		services[GIT_SERVICE] = NewGitService(conf)
 	}
 	return &ExportHandler{
 		Services: services,

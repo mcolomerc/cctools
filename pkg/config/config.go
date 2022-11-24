@@ -34,13 +34,14 @@ type CCloud struct {
 // EXPORT Configuration
 // **********************
 type Export struct {
-	Resources []Resource `yaml:"resources" validate:"required"`
-	Topics    Topics     `yaml:"topics" validate:"omitempty"`
-	CLink     CLink      `yaml:"clink" validate:"omitempty"`
-	CFK       CFK        `yaml:"cfk" validate:"omitempty"`
-	Exporters []Exporter `yaml:"exporters"`
-	Output    string     `yaml:"output" validate:"required"`
-	Schemas   Schemas    `yaml:"schemas" validate:"omitempty"`
+	Git       map[string]string `yaml:"git"`
+	Resources []Resource        `yaml:"resources" validate:"required"`
+	Topics    Topics            `yaml:"topics" validate:"omitempty"`
+	CLink     CLink             `yaml:"clink" validate:"omitempty"`
+	CFK       CFK               `yaml:"cfk" validate:"omitempty"`
+	Exporters []Exporter        `yaml:"exporters"`
+	Output    string            `yaml:"output" validate:"required"`
+	Schemas   Schemas           `yaml:"schemas" validate:"omitempty"`
 }
 
 // Topics export configuration

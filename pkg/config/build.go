@@ -1,8 +1,7 @@
 package config
 
 import (
-	"fmt"
-	"log"
+	"mcolomerc/cc-tools/pkg/log"
 	"mcolomerc/cc-tools/pkg/util"
 
 	"os"
@@ -35,24 +34,25 @@ func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Info("Using config file:", viper.ConfigFileUsed())
 	}
 	// Validate Config
 	if err := viper.Unmarshal(&c.Config); err != nil {
-		log.Printf("unable to unmarshall the config %v", err)
+		log.Info("unable to unmarshall the config %v", err)
 		return c.Config, err
 	}
 	validate := validator.New()
 	if err := validate.Struct(&c.Config); err != nil {
-		log.Printf("Missing required attributes %v\n", err)
+		log.Info("Missing required attributes %v\n", err)
 		return c.Config, err
 	}
 	//Build Output
 	if _, err := c.buildOutput(); err != nil {
-		log.Printf("Can't mount Output folder %v\n", err)
+		log.Info("Can't mount Output folder %v\n", err)
 		return c.Config, err
 	}
-
+	log.Debug(c.Config)
+	log.Debug(c.Config.Export.Git)
 	return c.Config, nil
 }
 
