@@ -324,12 +324,3 @@ MacOS:
 
 
 
-	https://docs.confluent.io/cloud/current/connectors/index.html#supported-connectors
-Managed Cloud connectors
-Networking 
-https://docs.confluent.io/cloud/current/connectors/index.html#networking
-Limitations
-https://docs.confluent.io/cloud/current/connectors/limits.html#limitations 
-            Own Managed Connectors
-Connect Kafka Connect to Confluent Cloud
-https://docs.confluent.io/cloud/current/cp-component/connect-cloud-config.html
