@@ -1,8 +1,8 @@
 package export
 
 type CfkExporter struct {
-	Namespace      string
-	KafkaRestClass string
+	Namespace  string
+	ClusterRef string
 }
 
 type Metadata struct {
