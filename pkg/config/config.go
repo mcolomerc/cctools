@@ -63,8 +63,9 @@ type CLink struct {
 
 // CFK export configuration
 type CFK struct {
-	Namespace      string `yaml:"namespace"`
-	KafkaRestClass string `yaml:"kafkarestclass"`
+	Namespace                string `yaml:"namespace"`
+	KafkaRestClass           string `yaml:"kafkarestclass"`
+	SchemaRegistryClusterRef string `yaml:"schemaRegistryClusterRef"`
 }
 
 // Schema registry

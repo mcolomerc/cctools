@@ -39,6 +39,8 @@ func NewSchemasService(conf config.Config) *SchemasService {
 			exporters = append(exporters, sregexp.NewSRegYamlExporter())
 		} else if v == config.Excel {
 			exporters = append(exporters, sregexp.NewSRegExcelExporter())
+		} else if v == config.Cfk {
+			exporters = append(exporters, sregexp.NewSRegCfkExporter(conf))
 		} else {
 			log.Info("Schema Registry exporter: Unrecognized exporter: ", v)
 		}

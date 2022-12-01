@@ -1,6 +1,8 @@
 package util
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"os"
 )
@@ -16,4 +18,13 @@ func BuildPath(outPath string) (string, error) {
 		}
 	}
 	return outPath, nil
+}
+
+// Indent JSON
+func IndentJson(str string) (string, error) {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, []byte(str), "", "\t"); err != nil {
+		return "", err
+	}
+	return prettyJSON.String(), nil
 }

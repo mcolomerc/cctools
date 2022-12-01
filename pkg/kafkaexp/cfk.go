@@ -24,10 +24,8 @@ type Spec struct {
 	KafkaRestClass KafkaRestClass         `yaml:"kafkaRestClassRef"`
 }
 type Topic_CRD struct {
-	ApiVersion string          `yaml:"apiVersion"`
-	Kind       string          `yaml:"kind"`
-	Metadata   export.Metadata `yaml:"metadata"`
-	Spec       Spec            `yaml:"spec"`
+	model.CRD `yaml:",inline"`
+	Spec      Spec `yaml:"spec"`
 }
 
 const (
@@ -38,8 +36,8 @@ const (
 func NewKafkaCfkExporter(config config.Config) *KafkaCfkExporter {
 	return &KafkaCfkExporter{
 		CfkExporter: export.CfkExporter{
-			Namespace:      config.Export.CFK.Namespace,
-			KafkaRestClass: config.Export.CFK.KafkaRestClass,
+			Namespace:  config.Export.CFK.Namespace,
+			ClusterRef: config.Export.CFK.KafkaRestClass,
 		},
 	}
 
@@ -52,19 +50,22 @@ func (e KafkaCfkExporter) ExportTopics(topics []model.Topic, outputPath string) 
 		for _, vc := range v.Configs {
 			configs[vc.Name] = vc.Value
 		}
-		crd := &Topic_CRD{
+		c := &model.CRD{
 			ApiVersion: apiVersion,
 			Kind:       kind,
 			Metadata: export.Metadata{
 				Name:      v.Name,
 				Namespace: e.Namespace,
 			},
+		}
+		crd := &Topic_CRD{
+			CRD: *c,
 			Spec: Spec{
 				Replicas:   v.ReplicationFactor,
 				Partitions: v.Partitions,
 				Configs:    configs,
 				KafkaRestClass: KafkaRestClass{
-					Name: e.KafkaRestClass,
+					Name: e.ClusterRef,
 				},
 			},
 		}
