@@ -2,6 +2,7 @@ package kafkaexp
 
 import (
 	"mcolomerc/cc-tools/pkg/export"
+	"mcolomerc/cc-tools/pkg/log"
 	"mcolomerc/cc-tools/pkg/model"
 )
 
@@ -16,8 +17,25 @@ func NewKafkaJsonExporter() *KafkaJsonExporter {
 	}
 }
 
+func (e KafkaJsonExporter) ExportTopic(topic model.Topic, outputPath string) error {
+	return e.JsonExporter.Export(topic, outputPath+"/"+topic.Name)
+}
+
 func (e KafkaJsonExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-	return e.JsonExporter.Export(topics, outputPath+"topics")
+	done := make(chan bool, len(topics))
+	for _, topic := range topics {
+		err := e.ExportTopic(topic, outputPath)
+		if err != nil {
+			log.Error("Error generating JSON for Topic ..." + topic.Name)
+			log.Error(err)
+		}
+		done <- true
+	}
+	for i := 0; i < len(topics); i++ {
+		<-done
+	}
+	close(done)
+	return nil
 }
 
 func (e KafkaJsonExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {

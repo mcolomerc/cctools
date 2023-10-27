@@ -19,16 +19,16 @@ const (
 	GIT_SERVICE     = "git"
 )
 
-func NewExportHandler(conf config.Config) *ExportHandler {
+func NewExportHandler(conf config.Config) (*ExportHandler, error) {
 	services := make(map[string]Service)
 	for _, resource := range conf.Export.Resources {
 		if resource == config.ExportTopics {
-			services[KAFKA_SERVICE] = NewKafkaService(conf)
-		}
-		if resource == config.ExportConsumerGroups {
-			if _, ok := services[KAFKA_SERVICE]; !ok {
-				services[KAFKA_SERVICE] = NewKafkaService(conf)
+			serv, err := NewKafkaService(conf)
+			if err != nil {
+				log.Error("Error creating Kafka service: ", err)
+				return nil, err
 			}
+			services[KAFKA_SERVICE] = serv
 		}
 		if resource == config.ExportSchemas {
 			services[SCHEMAS_SERVICE] = NewSchemasService(conf)
@@ -41,7 +41,7 @@ func NewExportHandler(conf config.Config) *ExportHandler {
 	}
 	return &ExportHandler{
 		Services: services,
-	}
+	}, nil
 }
 
 func (exp *ExportHandler) BuildExport() {

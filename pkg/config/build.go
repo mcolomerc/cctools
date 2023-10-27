@@ -34,16 +34,17 @@ func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		log.Info("Using config file:", viper.ConfigFileUsed())
+		log.Info("Using config file: " + viper.ConfigFileUsed())
 	}
 	// Validate Config
 	if err := viper.Unmarshal(&c.Config); err != nil {
-		log.Info("unable to unmarshall the config %v", err)
+		log.Error("unable to unmarshall the config %v", err)
 		return c.Config, err
 	}
 	validate := validator.New()
 	if err := validate.Struct(&c.Config); err != nil {
-		log.Info("Missing required attributes %v\n", err)
+		log.Error("Not a valid Config. Missing required attributes")
+		log.Error(err)
 		return c.Config, err
 	}
 	//Build Output
@@ -53,6 +54,7 @@ func (c ConfigBuilder) Build(cfgFile string) (Config, error) {
 	}
 	log.Debug(c.Config)
 	log.Debug(c.Config.Export.Git)
+	log.Debug(c.Config.Source.BootstrapServer)
 	return c.Config, nil
 }
 

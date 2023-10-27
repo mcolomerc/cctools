@@ -16,7 +16,7 @@ type MdsService struct {
 }
 
 func NewMdsService(conf config.Config) *MdsService {
-	restClient := client.New(conf.EndpointUrl, conf.Credentials)
+	restClient := client.NewRestClient(conf.EndpointUrl, conf.Credentials)
 	return &MdsService{
 		RestClient: *restClient,
 		Conf:       conf,

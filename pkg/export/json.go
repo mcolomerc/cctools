@@ -2,7 +2,7 @@ package export
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 )
 
 type JsonExporter struct{}
@@ -16,7 +16,7 @@ func (e JsonExporter) Export(res interface{}, outputPath string) error {
 	if errJson != nil {
 		return errJson
 	}
-	err := ioutil.WriteFile(outputPath+".json", file, 0644)
+	err := os.WriteFile(outputPath+".json", file, 0644)
 	if err != nil {
 		return err
 	}
