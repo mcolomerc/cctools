@@ -77,6 +77,8 @@ Export format:
 
 ### Export Topics command
 
+Includes Topic ACLs
+
 `cctools export topics --help`
 
 ```sh
@@ -98,8 +100,8 @@ Global Flags:
 
 Configuration:
 
-- Source Kafka coonnection
-- Output path
+- Source Kafka connection configuration.
+- Output path. Export destination.
 - Exporter configuration:
   - Specific configuration for each exporter (See Exporters)
 
