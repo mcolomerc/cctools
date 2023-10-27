@@ -7,8 +7,6 @@ This CLI uses Kafka client and REST APIs to extract and export all the resources
 
 It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool.
 
-<img src="./docs/image.png" width="500">
-
 ## Installation
 
 Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download your OS distribution.
