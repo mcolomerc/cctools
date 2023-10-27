@@ -10,7 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@master
       with:     
-        token: ${{ secrets.RELEASE_PAT }}
         fetch-depth: 0
     - name: Bump version and push tag
       uses: RueLaLa/auto-tagger@master
