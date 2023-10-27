@@ -1,9 +1,9 @@
 
 # Confluent Migration Tools
 
-`cctools` is command Line tool for helping on migrations to Confluent Cloud or Confluent Platform.
+`cctool` is command Line tool for helping on migrations to Confluent Cloud or Confluent Platform.
 
-This CLI uses Kafka client and Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters.
+This CLI uses Kafka client and REST APIs to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters.
 
 It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool.
 
@@ -19,14 +19,14 @@ Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download you
 
 Export Topics and Schemas.
 
-`cctool export --help`
+`cctools export --help`
 
 ```sh
 Command to export cluster information.
 
 Usage:
-  cctool export [flags]
-  cctool export [command]
+  cctools export [flags]
+  cctools export [command]
 
 Aliases:
   export, export-info, cluster-export, confluent-exp, exp
@@ -42,10 +42,17 @@ Flags:
 Global Flags:
   -c, --config string   config file (default is $HOME/.config.yaml)
 
-Use "cctool export [command] --help" for more information about a command.
+Use "cctools export [command] --help" for more information about a command.
 ```
 
-Config:
+**Configuration**:
+
+- Source Kafka cluster connection 
+- `output` path.
+- Exporter configuration:
+  - Specific configuration for each exporter (See Exporters)
+ 
+Example for Confluent Cloud:
 
 ```sh
 source: 
@@ -57,25 +64,28 @@ source:
     - sasl.password: <CONFLUENT_CLOUD_API_SECRET>
 export:  
   output: output #Output Path
+export: 
+  topics:
+    exclude: _confluent 
 ```
 
-Output format:
+Export format:
 
-- JSON: `export schemas --output json --config config.yaml`
-- YAML: `export schemas --output yaml --config config.yaml`
-- CFK(YML): `export schemas --output cfk --config config.yaml`
-- CLINK(SH): `export schemas --output clink --config config.yaml`
-- HCL(TFVARS): `export schemas --output hcl --config config.yaml`
+- JSON: `cctools export --output json --config config.yaml`
+- YAML: `cctools export --output yaml --config config.yaml`
+- CFK(YML): `cctools export --output cfk --config config.yaml`
+- CLINK(SH): `cctools export --output clink --config config.yaml`
+- HCL(TFVARS): `cctools export --output hcl --config config.yaml`
 
 ### Export Topics command
 
-`cctool export topics --help`
+`cctools export topics --help`
 
 ```sh
  Command to export Topics information.
 
 Usage:
-  cctool export topics [flags]
+  cctools export topics [flags]
 
 Aliases:
   topics, topic-info, topic-exp, tpc
@@ -129,23 +139,23 @@ export:
 
 Output format:
 
-- JSON: `export topics --output json --config config.yaml`
-- YAML: `export topics --output yaml --config config.yaml`
-- CFK(YML): `export topics --output cfk --config config.yaml`
-- CLINK(SH): `export topics --output clink --config config.yaml`
-- HCL(TFVARS): `export topics --output hcl --config config.yaml`
+- JSON: `cctools export topics --output json --config config.yaml`
+- YAML: `cctools export topics --output yaml --config config.yaml`
+- CFK(YML): `cctools export topics --output cfk --config config.yaml`
+- CLINK(SH): `cctools export topics --output clink --config config.yaml`
+- HCL(TFVARS): `cctools export topics --output hcl --config config.yaml`
 
 ---
 
 ### Export Schemas
 
-`cctool export schemas --help`
+`cctools export schemas --help`
 
 ```sh
  Command to export Schemas information.
 
 Usage:
-  cctool export schemas [flags]
+  cctcctools export schemas [flags]
 
 Aliases:
   schemas, schemas-info, schemas-exp, schema
@@ -160,11 +170,11 @@ Global Flags:
 
 Output format:
 
-- JSON: `export schemas --output json --config config.yaml`
-- YAML: `export schemas --output yaml --config config.yaml`
-- CFK(YML): `export schemas --output cfk --config config.yaml`
-- CLINK(SH): `export schemas --output clink --config config.yaml`
-- HCL(TFVARS): `export schemas --output hcl --config config.yaml`
+- JSON: `cctools export schemas --output json --config config.yaml`
+- YAML: `cctools export schemas --output yaml --config config.yaml`
+- CFK(YML): `cctools export schemas --output cfk --config config.yaml`
+- CLINK(SH): `cctools export schemas --output clink --config config.yaml`
+- HCL(TFVARS): `cctools export schemas --output hcl --config config.yaml`
 
 See [Schemas](docs/Schemas.md)
 
@@ -174,9 +184,14 @@ The tool needs a configuration file (yml).
 
 Configuration file: ```--config config.yml```
 
-Source Kafka cluster:
+### Source Kafka cluster
+
 Exporter will use Kafka client to get source cluster metadata.
 
+- `bootstrapServer`: Source bootstrap server
+  
+- `clientProps`: Kafka client properties map.
+  
 Confluent Cloud example:
 
 ```yaml
@@ -189,7 +204,7 @@ source:
     - sasl.password: <CONFLUENT_CLOUD_API_SECRET>
 ```
 
-#### **Schema Registry**
+### Schema Registry
 
 Schema Registry connection configuration:
 
@@ -250,7 +265,7 @@ export:
 
 ### **Exporters**
 
-```cctools export``` supports different exporters setting `--output` flag: `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
+Supports different exporters setting `--output` flag (required): `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
 
 - JSON: `json`
 - YAML: `yaml`

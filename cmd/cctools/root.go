@@ -16,7 +16,7 @@ var toolsConfig config.Config
 var exportHandler services.ExportHandler
 
 var rootCmd = &cobra.Command{
-	Use:     "cctool",
+	Use:     "cctools",
 	Aliases: []string{"cct-info, cct, cct-exp, cctexp"},
 	Version: version,
 	Short:   "cctools - a simple CLI to manage migrations",

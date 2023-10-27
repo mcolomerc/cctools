@@ -12,8 +12,8 @@ import (
 var exportCmd = &cobra.Command{
 	Use:     "export",
 	Aliases: []string{"export-info, cluster-export, confluent-exp, exp"},
-	Short:   "Export Confluent Cloud Cluster Info",
-	Long:    ` Command to export Confluent Cloud cluster information.`,
+	Short:   "Export Cluster Info",
+	Long:    ` Command to export cluster information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Export all the resources: ")
 		buildConfig(cmd)
