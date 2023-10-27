@@ -19,7 +19,7 @@ type RestClient struct {
 	Bearer string
 }
 
-func New(url string, credentials config.Credentials) *RestClient {
+func NewRestClient(url string, credentials config.Credentials) *RestClient {
 	var client *http.Client
 	tls := credentials.Certificates != config.Certificates{}
 	if tls {

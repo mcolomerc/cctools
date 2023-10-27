@@ -1,10 +1,10 @@
 package kafkaexp
 
 import (
-	"io/ioutil"
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/model"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -40,11 +40,9 @@ func NewKafkaCfkExporter(config config.Config) *KafkaCfkExporter {
 			ClusterRef: config.Export.CFK.KafkaRestClass,
 		},
 	}
-
 }
 
 func (e KafkaCfkExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-
 	for _, v := range topics {
 		configs := make(map[string]interface{})
 		for _, vc := range v.Configs {
@@ -73,7 +71,7 @@ func (e KafkaCfkExporter) ExportTopics(topics []model.Topic, outputPath string) 
 		if errJson != nil {
 			return errJson
 		}
-		err := ioutil.WriteFile(outputPath+"/"+v.Name+".yml", file, 0644)
+		err := os.WriteFile(outputPath+"/"+v.Name+".yml", file, 0644)
 		if err != nil {
 			return err
 		}

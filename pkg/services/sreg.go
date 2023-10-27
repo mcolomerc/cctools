@@ -30,7 +30,7 @@ const (
 )
 
 func NewSchemasService(conf config.Config) *SchemasService {
-	restClient := client.New(conf.SchemaRegistry.EndpointUrl, conf.SchemaRegistry.Credentials)
+	restClient := client.NewRestClient(conf.SchemaRegistry.EndpointUrl, conf.SchemaRegistry.Credentials)
 	var exporters []sregexp.SRegExporter
 	for _, v := range conf.Export.Exporters {
 		if v == config.Json {
@@ -77,7 +77,7 @@ func (service *SchemasService) Export() {
 		<-done
 	}
 	close(done)
-	log.Info("Schema registry exported")
+	log.Info("Schema registry exported: Schemas: " + service.Paths.Schemas + " Subjects: " + service.Paths.Subjects)
 }
 
 func (service *SchemasService) exportSchemas(exported chan bool) {
@@ -155,7 +155,8 @@ func (service *SchemasService) GetSubjects() []model.SubjectVersion {
 func (service *SchemasService) GetSubjectVersions(subject string) []model.SubjectVersion {
 	subjectsVersions, err := service.RestClient.GetList(service.SchemaRegistryUrl + "subjects/" + subject + "/versions")
 	if err != nil {
-		log.Error("Error getting Schema Registry GetSubjectVersions : %s\n", err)
+		log.Error("Error getting Schema Registry GetSubjectVersions : " + subject)
+		log.Error(err)
 	}
 	resp := make([]model.SubjectVersion, len(subjectsVersions))
 	done := make(chan model.SubjectVersion, len(subjectsVersions))

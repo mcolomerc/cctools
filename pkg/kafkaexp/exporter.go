@@ -14,7 +14,11 @@ type KafkaExporter interface {
 type ParentKafkaExporter struct {
 }
 
-func (e ParentKafkaExporter) ExportTopics(topics []model.Topic, outputPath string) error { return nil }
+// Abstracts the KafkaExporter interface
+
+func (e ParentKafkaExporter) ExportTopics(topics []model.Topic, outputPath string) error {
+	return nil
+}
 func (e ParentKafkaExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {
 	return nil
 }

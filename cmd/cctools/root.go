@@ -1,9 +1,8 @@
 package cctools
 
 import (
-	"fmt"
-	"log"
 	"mcolomerc/cc-tools/pkg/config"
+	log "mcolomerc/cc-tools/pkg/log"
 
 	"mcolomerc/cc-tools/pkg/services"
 	"os"
@@ -17,35 +16,27 @@ var toolsConfig config.Config
 var exportHandler services.ExportHandler
 
 var rootCmd = &cobra.Command{
-	Use:     "cct",
+	Use:     "cctool",
 	Aliases: []string{"cct-info, cct, cct-exp, cctexp"},
 	Version: version,
-	Short:   "cctools - a simple CLI to manage Clonfluent Cloud",
-	Long: `a simple CLI to manage Clonfluent Cloud
+	Short:   "cctools - a simple CLI to manage migrations",
+	Long: `a simple CLI to manage migrations,
     
-One can use cctools to ...`,
+One can use cctools to ...
+ - Export Topics and ACls from a Kafka Source cluster to different formats (JSON,YML,CFK,HCL, ...)
+ - Export Schemas and Subjects from Schema Registry to different formats (JSON,YML,CFK,HCL, ...)`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 	},
 }
 
-func initConfig() {
-	tConfig, err := config.ConfigBuilder{}.Build(cfgFile)
-	if err != nil {
-		log.Fatalf("Error Reading Config")
-	}
-	toolsConfig = tConfig
-	exportHandler = *services.NewExportHandler(toolsConfig)
-}
-
 func Execute() {
-	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config.yaml)")
+	rootCmd.MarkPersistentFlagRequired("config")
+	//cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	rootCmd.MarkFlagRequired("config")
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Whoops. There was an error while executing your CLI '%s'", err)
+		log.Error(err)
 		os.Exit(1)
 	}
-
 }

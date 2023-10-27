@@ -22,7 +22,7 @@ func NewKafkaClinkExporter(conf config.Config) *KafkaClinkExporter {
 	exp := export.ClinkExporter{
 		LinkName:             conf.Export.CLink.Name,
 		SourceClusterId:      conf.Cluster,
-		BootstrapServer:      conf.BootstrapServer,
+		BootstrapServer:      conf.Source.BootstrapServer,
 		SourceApiKey:         conf.Credentials.Key,
 		SourceApiSecret:      conf.Credentials.Secret,
 		DestinationClusterId: conf.Export.CLink.Destination,

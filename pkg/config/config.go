@@ -1,13 +1,20 @@
 package config
 
 type Config struct {
-	Cluster         string         `yaml:"cluster" validate:"required"`
-	EndpointUrl     string         `yaml:"endpointUrl" validate:"required"`
-	BootstrapServer string         `yaml:"bootstrapServer" validate:"required"`
-	Credentials     Credentials    `yaml:"credentials"`
-	CCloud          CCloud         `yaml:"ccloud" validate:"omitempty"`
-	Export          Export         `yaml:"export"`
-	SchemaRegistry  SchemaRegistry `yaml:"schemaregistry" validate:"omitempty"`
+	Cluster string `yaml:"cluster"`
+	// KafkaAdmin client
+	Source `yaml:"source" validate:"required"`
+	// Getting rBAC from CC
+	CCloud `yaml:"ccloud" validate:"omitempty"`
+	// Export Configuration
+	Export `yaml:"export"`
+	// Schema Registry client
+	SchemaRegistry `yaml:"schemaregistry" validate:"omitempty"`
+}
+
+type Source struct {
+	BootstrapServer string            `yaml:"bootstrapServer"`
+	ClientProps     map[string]string `yaml:"clientProps"`
 }
 
 type SchemaRegistry struct {
@@ -35,13 +42,13 @@ type CCloud struct {
 // **********************
 type Export struct {
 	Git       map[string]string `yaml:"git"`
-	Resources []Resource        `yaml:"resources" validate:"required"`
-	Topics    Topics            `yaml:"topics" validate:"omitempty"`
-	CLink     CLink             `yaml:"clink" validate:"omitempty"`
-	CFK       CFK               `yaml:"cfk" validate:"omitempty"`
-	Exporters []Exporter        `yaml:"exporters"`
-	Output    string            `yaml:"output" validate:"required"`
-	Schemas   Schemas           `yaml:"schemas" validate:"omitempty"`
+	Resources []Resource        `yaml:"resources"`
+	Topics    `yaml:"topics" validate:"omitempty"`
+	CLink     `yaml:"clink" validate:"omitempty"`
+	CFK       `yaml:"cfk" validate:"omitempty"`
+	Exporters []Exporter `yaml:"exporters"`
+	Output    string     `yaml:"output" validate:"required"`
+	Schemas   `yaml:"schemas" validate:"omitempty"`
 }
 
 // Topics export configuration
@@ -90,10 +97,11 @@ const (
 	ExportTopics         Resource = "topics"
 	ExportSchemas        Resource = "schemas"
 	ExportConsumerGroups Resource = "consumer_groups"
+	ExportAcls           Resource = "acls"
 )
 
 func (e Resource) String() string {
-	resources := [...]string{"topics", "schemas", "consumer_groups"}
+	resources := [...]string{"topics", "schemas", "consumer_groups", "acls"}
 
 	x := string(e)
 	for _, v := range resources {
@@ -115,3 +123,16 @@ const (
 	Cfk   Exporter = "cfk"
 	Hcl   Exporter = "hcl"
 )
+
+func (e Exporter) String() string {
+	resources := [...]string{"clink", "cfk", "hcl", "json", "yaml", "excel"}
+
+	x := string(e)
+	for _, v := range resources {
+		if v == x {
+			return x
+		}
+	}
+
+	return ""
+}

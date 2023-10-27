@@ -3,7 +3,7 @@
 
 `cctools` is command Line tool for helping on migrations to Confluent Cloud or Confluent Platform.
 
-This CLI uses Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters. 
+This CLI uses Kafka client and Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters.
 
 It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool. 
 
@@ -12,12 +12,14 @@ It allows to export resources into different formats, that could be used as inpu
 
 - [Confluent Migration Tools](#confluent-migration-tools)
   - [Installation](#installation)
+  - [Usage](#usage)
+    - [Export](#export)
+    - [Export Topics command](#export-topics-command)
+    - [Export Schemas](#export-schemas)
   - [Configuration](#configuration)
-    - [Connection](#connection)
       - [**Schema Registry**](#schema-registry)
   - [Commands](#commands)
-    - [Resources](#resources)
-    - [Output](#output)
+    - [Output folder](#output-folder)
     - [**Exporters**](#exporters)
     - [External resources](#external-resources)
 - [Sources](#sources)
@@ -32,80 +34,171 @@ It allows to export resources into different formats, that could be used as inpu
 
 Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download your OS distribution.
 
+## Usage
+
+### Export
+
+Export Topics and Schemas. 
+
+```sh
+Usage:
+  cctool export [flags]
+  cctool export [command]
+
+Aliases:
+  export, export-info, cluster-export, confluent-exp, exp
+
+Available Commands:
+  schemas     Export Schemas Info
+  topics      Export Topics Info
+
+Flags:
+  -h, --help            help for export
+  -o, --output string   Output format. Possible values: json, yaml, hcl, cfk, clink
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.config.yaml)
+```
+
+Config: 
+
+```sh
+source: 
+  bootstrapServer: <BOOTSTRAP_SERVER>.confluent.cloud:9092
+  clientProps:
+    - sasl.mechanisms: PLAIN
+    - security.protocol: SASL_SSL
+    - sasl.username: <CONFLUENT_CLOUD_API_KEY>
+    - sasl.password: <CONFLUENT_CLOUD_API_SECRET>
+export:  
+  output: output #Output Path
+```
+
+Output format:
+
+- JSON: `export schemas --output json --config config.yaml`
+- YAML: `export schemas --output yaml --config config.yaml`
+- CFK(YML): `export schemas --output cfk --config config.yaml`
+- CLINK(SH): `export schemas --output clink --config config.yaml`
+- HCL(TFVARS): `export schemas --output hcl --config config.yaml`
+
+### Export Topics command
+
+`cctools export topics`
+
+```sh
+Usage:
+  cct export topics [flags]
+
+Aliases:
+  topics, topic-info, topic-exp, tpc
+
+Flags:
+  -h, --help   help for topics
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.config.yaml)
+  -o, --output string   Output format. Possible values: json, yaml, hcl, cfk, clink
+```
+
+Configuration:
+
+- Source Kafka coonnection
+- Output path
+- Exporter configuration:
+  - Specific configuration for each exporter (See Exporters)
+
+`--config`
+
+Configuration (config.yml)
+
+Using Topic Exporter Configuration to exclude some topics.   
+
+All topics names containing `_confluent` will be excluded.
+
+```yaml
+export: 
+  topics:
+    exclude: _confluent 
+```
+
+config.yml:
+
+```yaml
+source: 
+  bootstrapServer: <BOOTSTRAP_SERVER>.confluent.cloud:9092
+  clientProps:
+    - sasl.mechanisms: PLAIN
+    - security.protocol: SASL_SSL
+    - sasl.username: <CONFLUENT_CLOUD_API_KEY>
+    - sasl.password: <CONFLUENT_CLOUD_API_SECRET>
+export: 
+  topics:
+    exclude: _confluent 
+  output: output #Output Path
+```
+
+`--output`
+
+Output format:
+
+- JSON: `export topics --output json --config config.yaml`
+- YAML: `export topics --output yaml --config config.yaml`
+- CFK(YML): `export topics --output cfk --config config.yaml`
+- CLINK(SH): `export topics --output clink --config config.yaml`
+- HCL(TFVARS): `export topics --output hcl --config config.yaml`
+
+---
+
+### Export Schemas
+
+`cctools export schemas`
+
+```sh
+Error: required flag(s) "config", "output" not set
+Usage:
+  cct export schemas [flags]
+
+Aliases:
+  schemas, schemas-info, schemas-exp, schema
+
+Flags:
+  -h, --help   help for schemas
+
+Global Flags:
+  -c, --config string   config file (default is $HOME/.config.yaml)
+  -o, --output string   Output format. Possible values: json, yaml, hcl, cfk, clink
+```
+
+Output format:
+
+- JSON: `export schemas --output json --config config.yaml`
+- YAML: `export schemas --output yaml --config config.yaml`
+- CFK(YML): `export schemas --output cfk --config config.yaml`
+- CLINK(SH): `export schemas --output clink --config config.yaml`
+- HCL(TFVARS): `export schemas --output hcl --config config.yaml`
+
+See [Schemas](docs/Schemas.md)
+
 ## Configuration
 
 The tool needs a configuration file (yml).
 
 Configuration file: ```--config config.yml```
 
-```yaml 
-#cluster id
-cluster: <CLUSTER_ID>
-#bootstrap server
-bootstrapServer: <BOOTSTRAP_SERVER> 
-#REST endpint 
-endpointUrl: <REST_ENDPOINT>
-#Credentials
-credentials: 
-  key: <USER> # or CCloud API_KEY 
-  secret: <PASSWORD> # or CCloud API_SECRET  
-  # Certificates - Confluent Platform 
-  certificates: 
-    certFile: <CERT file path>  
-    keyFile: <KEY file path>  
-    CAFile: <CA File path>
-ccloud:
-  environment: <ENVIRONMENT_ID>   
-```
+Source Kafka cluster:
+Exporter will use Kafka client to get source cluster metadata. 
 
-### Connection
-
-* Rest Api URL: ```endpointUrl: <REST_ENDPOINT>```
-
-* Credentials: 
-  
-  * ```key: <USER>``` or Confluent Cloud API_KEY.
-  
-  * ```secret: <PASSWORD>``` or Confluent Cloud API_SECRET  
+Confluent Cloud example:
 
 ```yaml
-cluster: <CLUSTER_ID>
-#bootstrap server
-bootstrapServer: <BOOTSTRAP_SERVER> 
-#REST endpint 
-endpointUrl: <REST_ENDPOINT>
-#Credentials
-credentials: 
-  key: <USER> # or CCloud API_KEY 
-  secret: <PASSWORD> # or CCloud API_SECRET   
-```
-
-If certiticates are needed:
-
-* Certificates:
-   
-  * `certFile`: Certificate file path
-  
-  * `keyFile`: Key file path
-  
-  * `CAFile`: CA file path
-
-
-```yaml
-cluster: <CLUSTER_ID>
-#bootstrap server
-bootstrapServer: <BOOTSTRAP_SERVER> 
-#REST endpint 
-endpointUrl: <REST_ENDPOINT>
-#Credentials
-credentials: 
-  key: <USER>  
-  secret: <PASSWORD>  
-  # Certificates - Confluent Platform 
-  certificates: 
-    certFile: <CERT file path>  
-    keyFile: <KEY file path>  
-    CAFile: <CA File path>
+source: 
+  bootstrapServer: <BOOTSTRAP_SERVER>.confluent.cloud:9092
+  clientProps:
+    - sasl.mechanisms: PLAIN
+    - security.protocol: SASL_SSL
+    - sasl.username: <CONFLUENT_CLOUD_API_KEY>
+    - sasl.password: <CONFLUENT_CLOUD_API_SECRET>
 ```
 
 #### **Schema Registry** 
@@ -124,13 +217,13 @@ schemaRegistry:
 
 If certiticates are needed:
 
-* Certificates:
+- Certificates:
 
-  * `certFile`: Certificate file path
+  - `certFile`: Certificate file path
   
-  * `keyFile`: Key file path
+  - `keyFile`: Key file path
   
-  * `CAFile`: CA file path
+  - `CAFile`: CA file path
 
 ```yaml
 #Schema Registry 
@@ -148,77 +241,7 @@ schemaRegistry:
 
 ---
 
-## Commands
-
-`export`
-
-Configuration:
-
-* Resources to export, a list of resources to export, available values: `topics`, `consumer_groups`, `schemas`.  
-* Output path
-* Exporter configuration 
-  * Specific configuration for each exporter (See Exporters)
-* List of Exporters 
-  * List of export formats: 
-    * `json`: Json files
-    * `yaml`: YAML files
-    * `excel`: Excel files
-    * `clink`: Cluster Linking commands (.sh and configuration files) 
-    * `cfk`: Confluent For Kubernetes Custom Resources definitions. (YAML for Kubernetes)
-    * `hcl`: Terraform exporter
-
-```yaml
-export:
-  resources:
-    - topics
-    - consumer_groups
-    - schemas
-  topics:
-    exclude: _confluent
-  exporters: 
-  - excel
-  - yaml 
-  - json  
-  output: output #Output Path
-``` 
-
----
-
-### Resources
-
-Required: Configure resources to export.
-
-* Export Topics including Topic configuration: ```topics```
-
-```yaml
-export:  
-  resources: 
-    - topics
-```
-
-See [Topics](docs/Topics.md).
-
-* Export Consumer Groups information: ```consumer_groups```
-
-```yaml
-export:  
-  resources: 
-    - consumer_groups
-```
-
-* Export Schema Registry information: ```schemas```
-
-```yaml
-export:  
-  resources: 
-    - schemas
-```
-
-See [Schemas](docs/Schemas.md)
-
----
-
-### Output
+### Output folder
 
 Configure the output folder, it will be created if it does not exist.
 
@@ -239,32 +262,15 @@ export:
 
 ### **Exporters** 
 
-```cctools export``` supports different exporters by configuration: `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
+```cctools export``` supports different exporters setting `--output` flag: `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
 
-* JSON: `json`
-* YAML: `yaml`
-* Excel: `excel`
-* [CLinkExporter](docs/CLinkExporter.md): `clink`
-* [CFKExporter](docs/CFKExporter.md): `cfk`
-* [HCLExporter](docs/HCLExporter.md): `hcl`
+- JSON: `json`
+- YAML: `yaml`
+- Excel: `excel`
+- [CLinkExporter](docs/CLinkExporter.md): `clink`
+- [CFKExporter](docs/CFKExporter.md): `cfk`
+- [HCLExporter](docs/HCLExporter.md): `hcl`
 
-Example: Use the following configuration to export to *YAML* format only:
-
-```yaml
-export:
-  exporters:  
-  - yaml  
-```
-
-Example: Use the following configuration to export to *Excel*, YAML and JSON formats:
-
-```yaml
-export:
-  exporters: 
-  - excel
-  - yaml 
-  - json  
-```
 
 ### External resources
 
@@ -294,7 +300,30 @@ In the example above:
 
 ## Execute
 
-`go run main.go  export  --config config_cloud.yml`
+Export everything to all the formats available:
+
+- `go run main.go  export  --config config_cloud.yml`
+
+- Export everything to JSON format:
+
+`go run main.go  export --output json --config config_cloud.yml` 
+
+- Export everything to JSON & YAML format: 
+`go run main.go  export --output json,yaml --config config_cloud.yml`   (Not supported)
+
+- Export Topics:
+
+`go run main.go  export topics --output json --config config_cloud.yml`
+
+- Export ACLs:
+
+`go run main.go  export acls --output json --config config_cloud.yml`
+ 
+- Export Schema Registry:
+
+`go run main.go export schemas --output yaml --config config_cloud.yml`
+
+
 
 ## DEBUG
 
