@@ -5,30 +5,9 @@
 
 This CLI uses Kafka client and Kafka REST API to extract and export all the resources from the Source cluster in order to replicate them on the target cluster. It was tested with Confluent Platform and Confluent Cloud clusters.
 
-It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool. 
+It allows to export resources into different formats, that could be used as input for different tools like Confluent Cloud, Terraform, Confluent For Kubernetes or any other tool.
 
 <img src="./docs/image.png" width="500">
-
-
-- [Confluent Migration Tools](#confluent-migration-tools)
-  - [Installation](#installation)
-  - [Usage](#usage)
-    - [Export](#export)
-    - [Export Topics command](#export-topics-command)
-    - [Export Schemas](#export-schemas)
-  - [Configuration](#configuration)
-      - [**Schema Registry**](#schema-registry)
-  - [Commands](#commands)
-    - [Output folder](#output-folder)
-    - [**Exporters**](#exporters)
-    - [External resources](#external-resources)
-- [Sources](#sources)
-  - [Execute](#execute)
-  - [DEBUG](#debug)
-  - [Releaser](#releaser)
-    - [Binary](#binary)
-    - [CI/CD](#cicd)
-  
 
 ## Installation
 
@@ -38,9 +17,13 @@ Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download you
 
 ### Export
 
-Export Topics and Schemas. 
+Export Topics and Schemas.
+
+`cctool export --help`
 
 ```sh
+Command to export cluster information.
+
 Usage:
   cctool export [flags]
   cctool export [command]
@@ -58,9 +41,11 @@ Flags:
 
 Global Flags:
   -c, --config string   config file (default is $HOME/.config.yaml)
+
+Use "cctool export [command] --help" for more information about a command.
 ```
 
-Config: 
+Config:
 
 ```sh
 source: 
@@ -84,11 +69,13 @@ Output format:
 
 ### Export Topics command
 
-`cctools export topics`
+`cctool export topics --help`
 
 ```sh
+ Command to export Topics information.
+
 Usage:
-  cct export topics [flags]
+  cctool export topics [flags]
 
 Aliases:
   topics, topic-info, topic-exp, tpc
@@ -112,7 +99,7 @@ Configuration:
 
 Configuration (config.yml)
 
-Using Topic Exporter Configuration to exclude some topics.   
+Using Topic Exporter Configuration to exclude some topics.
 
 All topics names containing `_confluent` will be excluded.
 
@@ -152,12 +139,13 @@ Output format:
 
 ### Export Schemas
 
-`cctools export schemas`
+`cctool export schemas --help`
 
 ```sh
-Error: required flag(s) "config", "output" not set
+ Command to export Schemas information.
+
 Usage:
-  cct export schemas [flags]
+  cctool export schemas [flags]
 
 Aliases:
   schemas, schemas-info, schemas-exp, schema
@@ -187,7 +175,7 @@ The tool needs a configuration file (yml).
 Configuration file: ```--config config.yml```
 
 Source Kafka cluster:
-Exporter will use Kafka client to get source cluster metadata. 
+Exporter will use Kafka client to get source cluster metadata.
 
 Confluent Cloud example:
 
@@ -201,7 +189,7 @@ source:
     - sasl.password: <CONFLUENT_CLOUD_API_SECRET>
 ```
 
-#### **Schema Registry** 
+#### **Schema Registry**
 
 Schema Registry connection configuration:
 
@@ -260,7 +248,7 @@ export:
 
 ---
 
-### **Exporters** 
+### **Exporters**
 
 ```cctools export``` supports different exporters setting `--output` flag: `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
 
@@ -271,10 +259,9 @@ export:
 - [CFKExporter](docs/CFKExporter.md): `cfk`
 - [HCLExporter](docs/HCLExporter.md): `hcl`
 
-
 ### External resources
 
-Add external Git repositories to the `output`. 
+Add external Git repositories to the `output`.
 
 Provide a map as `target_dir`: `git url`.
 
@@ -306,9 +293,9 @@ Export everything to all the formats available:
 
 - Export everything to JSON format:
 
-`go run main.go  export --output json --config config_cloud.yml` 
+`go run main.go  export --output json --config config_cloud.yml`
 
-- Export everything to JSON & YAML format: 
+- Export everything to JSON & YAML format:
 `go run main.go  export --output json,yaml --config config_cloud.yml`   (Not supported)
 
 - Export Topics:
@@ -318,12 +305,10 @@ Export everything to all the formats available:
 - Export ACLs:
 
 `go run main.go  export acls --output json --config config_cloud.yml`
- 
+
 - Export Schema Registry:
 
 `go run main.go export schemas --output yaml --config config_cloud.yml`
-
-
 
 ## DEBUG
 
@@ -331,7 +316,7 @@ Enable Debug mode:`LOG=DEBUG` for extra logging.
 
 ## Releaser
 
-https://goreleaser.com/install/
+<https://goreleaser.com/install/>
 
 ```brew install goreleaser```
 
@@ -341,7 +326,7 @@ https://goreleaser.com/install/
 
 MacOS:
 
-```./dist/cctools_darwin_amd64_v1/cctools export --config config.yml```
+```./dist/cctools_darwin_amd64_v1/cctools export --config config.yml --output json```
 
 ### CI/CD
 
@@ -349,7 +334,4 @@ MacOS:
 
  1. `pr-tag`: Create a tag from every PR on the repo. You need to specify #major/#minor/#patch on the cluster for better version control. If not minor version will be created
 
- 2. `release`: Create a new release from the TAG created by the previous tag. This action in created on top of `goreleaser` and will create binaries for all the common distributions. 
-
-
-
+ 2. `release`: Create a new release from the TAG created by the previous tag. This action in created on top of `goreleaser` and will create binaries for all the common distributions.
