@@ -9,6 +9,8 @@ before:
 builds:
   - env:
       - CGO_ENABLED=1 
+    ldflags:
+      - -w -s
     goos:
       - linux
       - windows
@@ -17,6 +19,15 @@ builds:
     goarch:
       - amd64
       - arm64 
+    overrides:
+      - goos: linux
+        goarch: arm64
+        env: 
+          - CC=aarch64-linux-gnu-gcc
+      - goos: linux
+        goarch: amd64
+        env:
+          - CC:gcc 
 checksum:
   name_template: 'checksums.txt'
 snapshot:
