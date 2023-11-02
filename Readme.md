@@ -15,6 +15,13 @@ Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download you
 
 ### Copy
 
+Replicate cluster resources configurations.
+
+#### Topics and ACls
+
+Replicate cluster topics and Topics ACLs (no data replication).
+Scenarios when user wants to create an empty cluster with same topics and topics Acls configurations as source cluster.
+
 Command to Copy Topics and Topic ACLs from Source Kafka Cluster to Destination Kafka Cluster.
 
 ```sh
@@ -39,7 +46,7 @@ Global Flags:
   -c, --config string   config file  
 ```
 
-Configuration:
+#### Configuration file
 
 Source Cluster. Example with `SASL_SSL`
 
@@ -54,7 +61,7 @@ source:
     - sasl.password: <password>
 ```
 
-Destination Cluster (Confluent Cloud example)
+* Destination Cluster (Confluent Cloud example)
 
 ```yaml
 destination: 
@@ -66,7 +73,7 @@ destination:
     - sasl.password: <API_SECRET>
 ```
 
-Exclude Topics:
+* Exclude Topics:
 
 ```yaml
 export:
@@ -74,7 +81,7 @@ export:
     exclude: _confluent
 ```
 
-Topic ACLs - Principals Mapping
+* Topic ACLs - Principals Mapping
 
 All the Topic ACLs where `principal: User:test` will be created as `principal: User:sa-xyroox` on the Destination.
 
@@ -82,7 +89,6 @@ All the Topic ACLs where `principal: User:test` will be created as `principal: U
 principals:
   - "test": "sa-xyroox"
 ```
-
 
 ### Export
 
@@ -116,11 +122,11 @@ Use "cctools export [command] --help" for more information about a command.
 
 **Configuration**:
 
-- Source Kafka cluster connection 
-- `output` path.
-- Exporter configuration:
-  - Specific configuration for each exporter (See Exporters)
- 
+* Source Kafka cluster connection
+* `output` path.
+* Exporter configuration:
+  * Specific configuration for each exporter (See Exporters)
+
 Example for Confluent Cloud:
 
 ```sh
@@ -140,11 +146,11 @@ export:
 
 Export format:
 
-- JSON: `cctools export --output json --config config.yaml`
-- YAML: `cctools export --output yaml --config config.yaml`
-- CFK(YML): `cctools export --output cfk --config config.yaml`
-- CLINK(SH): `cctools export --output clink --config config.yaml`
-- HCL(TFVARS): `cctools export --output hcl --config config.yaml`
+* JSON: `cctools export --output json --config config.yaml`
+* YAML: `cctools export --output yaml --config config.yaml`
+* CFK(YML): `cctools export --output cfk --config config.yaml`
+* CLINK(SH): `cctools export --output clink --config config.yaml`
+* HCL(TFVARS): `cctools export --output hcl --config config.yaml`
 
 ### Export Topics command
 
@@ -171,10 +177,10 @@ Global Flags:
 
 Configuration:
 
-- Source Kafka connection configuration.
-- Output path. Export destination.
-- Exporter configuration:
-  - Specific configuration for each exporter (See Exporters)
+* Source Kafka connection configuration.
+* Output path. Export destination.
+* Exporter configuration:
+  * Specific configuration for each exporter (See Exporters)
 
 `--config`
 
@@ -210,11 +216,11 @@ export:
 
 Output format:
 
-- JSON: `cctools export topics --output json --config config.yaml`
-- YAML: `cctools export topics --output yaml --config config.yaml`
-- CFK(YML): `cctools export topics --output cfk --config config.yaml`
-- CLINK(SH): `cctools export topics --output clink --config config.yaml`
-- HCL(TFVARS): `cctools export topics --output hcl --config config.yaml`
+* JSON: `cctools export topics --output json --config config.yaml`
+* YAML: `cctools export topics --output yaml --config config.yaml`
+* CFK(YML): `cctools export topics --output cfk --config config.yaml`
+* CLINK(SH): `cctools export topics --output clink --config config.yaml`
+* HCL(TFVARS): `cctools export topics --output hcl --config config.yaml`
 
 ---
 
@@ -241,11 +247,11 @@ Global Flags:
 
 Output format:
 
-- JSON: `cctools export schemas --output json --config config.yaml`
-- YAML: `cctools export schemas --output yaml --config config.yaml`
-- CFK(YML): `cctools export schemas --output cfk --config config.yaml`
-- CLINK(SH): `cctools export schemas --output clink --config config.yaml`
-- HCL(TFVARS): `cctools export schemas --output hcl --config config.yaml`
+* JSON: `cctools export schemas --output json --config config.yaml`
+* YAML: `cctools export schemas --output yaml --config config.yaml`
+* CFK(YML): `cctools export schemas --output cfk --config config.yaml`
+* CLINK(SH): `cctools export schemas --output clink --config config.yaml`
+* HCL(TFVARS): `cctools export schemas --output hcl --config config.yaml`
 
 See [Schemas](docs/Schemas.md)
 
@@ -259,9 +265,9 @@ Configuration file: ```--config config.yml```
 
 Exporter will use Kafka client to get source cluster metadata.
 
-- `bootstrapServer`: Source bootstrap server
+* `bootstrapServer`: Source bootstrap server
   
-- `clientProps`: Kafka client properties map.
+* `clientProps`: Kafka client properties map.
   
 Confluent Cloud example:
 
@@ -291,13 +297,13 @@ schemaRegistry:
 
 If certiticates are needed:
 
-- Certificates:
+* Certificates:
 
-  - `certFile`: Certificate file path
+  * `certFile`: Certificate file path
   
-  - `keyFile`: Key file path
+  * `keyFile`: Key file path
   
-  - `CAFile`: CA file path
+  * `CAFile`: CA file path
 
 ```yaml
 #Schema Registry 
@@ -338,12 +344,12 @@ export:
 
 Supports different exporters setting `--output` flag (required): `json`, `yaml`,`excel`, `clink`, `cfk`, `hcl`
 
-- JSON: `json`
-- YAML: `yaml`
-- Excel: `excel`
-- [CLinkExporter](docs/CLinkExporter.md): `clink`
-- [CFKExporter](docs/CFKExporter.md): `cfk`
-- [HCLExporter](docs/HCLExporter.md): `hcl`
+* JSON: `json`
+* YAML: `yaml`
+* Excel: `excel`
+* [CLinkExporter](docs/CLinkExporter.md): `clink`
+* [CFKExporter](docs/CFKExporter.md): `cfk`
+* [HCLExporter](docs/HCLExporter.md): `hcl`
 
 ### External resources
 
@@ -363,9 +369,9 @@ export:
 
 In the example above:  
 
-- The `https://github.com/mddunn/ccloud-migration-scripts` repository will be cloned into `output/scripts`
+* The `https://github.com/mddunn/ccloud-migration-scripts` repository will be cloned into `output/scripts`
 
-- The `https://github.com/mcolomerc/terraform-confluent-topics` repository will be cloned into `output/terraform`
+* The `https://github.com/mcolomerc/terraform-confluent-topics` repository will be cloned into `output/terraform`
 
 ---
 
@@ -375,24 +381,24 @@ In the example above:
 
 Export everything to all the formats available:
 
-- `go run main.go  export  --config config_cloud.yml`
+* `go run main.go  export  --config config_cloud.yml`
 
-- Export everything to JSON format:
+* Export everything to JSON format:
 
 `go run main.go  export --output json --config config_cloud.yml`
 
-- Export everything to JSON & YAML format:
+* Export everything to JSON & YAML format:
 `go run main.go  export --output json,yaml --config config_cloud.yml`   (Not supported)
 
-- Export Topics:
+* Export Topics:
 
 `go run main.go  export topics --output json --config config_cloud.yml`
 
-- Export ACLs:
+* Export ACLs:
 
 `go run main.go  export acls --output json --config config_cloud.yml`
 
-- Export Schema Registry:
+* Export Schema Registry:
 
 `go run main.go export schemas --output yaml --config config_cloud.yml`
 
