@@ -11,6 +11,7 @@ builds:
       - CGO_ENABLED=1 
     ldflags:
       - -w -s
+      - CC=aarch64-linux-gnu-gcc
     goos:
       - linux
       - windows
