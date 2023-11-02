@@ -18,13 +18,13 @@ type KafkaAdminClient struct {
 	Client kafka.AdminClient
 }
 
-func NewKafkaAdminClient(cfg config.Config) (*KafkaAdminClient, error) {
-	log.Info("Using KafkaAdmin client configuration: " + cfg.Source.BootstrapServer)
+func NewKafkaAdminClient(cfg config.KafkaCluster) (*KafkaAdminClient, error) {
+	log.Info("Using Kafka configuration: " + cfg.BootstrapServer)
 	// Create a new AdminClient.
 	config := &kafka.ConfigMap{
-		"bootstrap.servers": cfg.Source.BootstrapServer,
+		"bootstrap.servers": cfg.BootstrapServer,
 	}
-	for k, v := range cfg.Source.ClientProps {
+	for k, v := range cfg.ClientProps {
 		config.SetKey(k, v)
 	}
 
@@ -37,6 +37,52 @@ func NewKafkaAdminClient(cfg config.Config) (*KafkaAdminClient, error) {
 	return &KafkaAdminClient{
 		Client: *a,
 	}, nil
+}
+
+func (kadmin *KafkaAdminClient) CreateTopics(inputTopics []model.Topic) error {
+	// Contexts are used to abort or limit the amount of time
+	// the Admin call blocks waiting for a result.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Create topics on cluster.
+	// Set Admin options to wait for the operation to finish (or at most 60s)
+	maxDur, err := time.ParseDuration("60s")
+	if err != nil {
+		panic("ParseDuration(60s)")
+	}
+	// Build destination topics
+	var destTopics []kafka.TopicSpecification
+	for _, inputTopic := range inputTopics {
+		destConfigs := make(map[string]string)
+		for _, c := range inputTopic.Configs {
+			destConfigs[c.Name] = c.Value.(string)
+		}
+		destTopic := kafka.TopicSpecification{
+			Topic:             inputTopic.Name,
+			NumPartitions:     inputTopic.Partitions.(int),
+			ReplicationFactor: inputTopic.ReplicationFactor.(int),
+			Config:            destConfigs,
+		}
+		destTopics = append(destTopics, destTopic)
+	}
+	results, err := kadmin.Client.CreateTopics(
+		ctx,
+		// Multiple topics can be created simultaneously
+		// by providing more TopicSpecification structs here.
+		destTopics,
+		// Admin options
+		kafka.SetAdminOperationTimeout(maxDur))
+	if err != nil {
+		log.Error("Failed to create topic:")
+		log.Error(err)
+		return err
+	}
+	// Print results
+	for _, result := range results {
+		log.Info("Topic created ... " + result.Topic)
+	}
+	return nil
 }
 
 func (kadmin *KafkaAdminClient) GetTopics(exclude string) ([]model.Topic, error) {
@@ -213,4 +259,94 @@ func (kadmin *KafkaAdminClient) GetACLs(topicName string) ([]model.AclBinding, e
 		results = append(results, nAcl)
 	}
 	return results, nil
+}
+
+func (kadmin *KafkaAdminClient) SetACLs(aclBindings []model.AclBinding, principals map[string]string) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Create ACLs on cluster.
+	// Set Admin options to wait for the request to finish (or at most 60s)
+	maxDur, err := time.ParseDuration("60s")
+	if err != nil {
+		panic("ParseDuration(60s)")
+	}
+	bindings, err := parseACLBindings(aclBindings, principals)
+	results, err := kadmin.Client.CreateACLs(
+		ctx,
+		bindings,
+		kafka.SetAdminRequestTimeout(maxDur),
+	)
+	if err != nil {
+		log.Error("Failed to create ACLs: %v\n", err)
+		return err
+	}
+
+	// Print results
+	for i, result := range results {
+		if result.Error.Code() == kafka.ErrNoError {
+			log.Info("Create ACLs: successful")
+		} else {
+			log.Error("CreateACLs %d failed, error code: %s, message: %s\n",
+				i, result.Error.Code(), result.Error.String())
+			return err
+		}
+	}
+
+	return nil
+}
+
+func parseACLBindings(args []model.AclBinding, principals map[string]string) (aclBindings kafka.ACLBindings, err error) {
+	parsedACLBindings := make(kafka.ACLBindings, len(args))
+	for i, aclBinding := range args {
+		resourceType, errParse := kafka.ResourceTypeFromString(aclBinding.ResourceType)
+		if errParse != nil {
+			err = errParse
+			log.Error("Invalid resource type: %s: %v\n", aclBinding.ResourceType, err)
+			return
+		}
+		resourcePatternType, errParse := kafka.ResourcePatternTypeFromString(aclBinding.PatternType)
+		if errParse != nil {
+			err = errParse
+			log.Error("Invalid resource pattern type: %s: %v\n", aclBinding.PatternType, err)
+			return
+		}
+
+		operation, errParse := kafka.ACLOperationFromString(aclBinding.Operation)
+		if errParse != nil {
+			err = errParse
+			log.Error("Invalid operation: %s: %v\n", aclBinding.Operation, err)
+			return
+		}
+
+		permissionType, errParse := kafka.ACLPermissionTypeFromString(aclBinding.Permission)
+		if errParse != nil {
+			err = errParse
+			log.Error("Invalid permission type: %s: %v\n", aclBinding.Permission, err)
+			return
+		}
+		log.Info("Principals mapping ")
+		user := strings.Split(aclBinding.Principal, ":")
+		principal := aclBinding.Principal
+		if user[0] == "User" {
+			mapping, ok := principals[user[1]]
+			if ok {
+				principal = user[0] + ":" + mapping
+			} else {
+				principal = user[0] + ":" + user[1]
+			}
+		}
+		parsedACLBindings[i] = kafka.ACLBinding{
+			Type:                resourceType,
+			Name:                aclBinding.ResourceName,
+			ResourcePatternType: resourcePatternType,
+			Principal:           principal,
+			Host:                aclBinding.Host,
+			Operation:           operation,
+			PermissionType:      permissionType,
+		}
+	}
+
+	aclBindings = parsedACLBindings
+	return
 }
