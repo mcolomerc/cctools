@@ -129,7 +129,7 @@ Use "cctools export [command] --help" for more information about a command.
 
 Example for Confluent Cloud:
 
-```sh
+```yml
 source: 
   bootstrapServer: <BOOTSTRAP_SERVER>.confluent.cloud:9092
   clientProps:
