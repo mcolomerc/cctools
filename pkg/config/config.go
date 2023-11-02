@@ -3,16 +3,18 @@ package config
 type Config struct {
 	Cluster string `yaml:"cluster"`
 	// KafkaAdmin client
-	Source `yaml:"source" validate:"required"`
+	Source KafkaCluster `yaml:"source" validate:"required"`
 	// Getting rBAC from CC
 	CCloud `yaml:"ccloud" validate:"omitempty"`
 	// Export Configuration
 	Export `yaml:"export"`
 	// Schema Registry client
 	SchemaRegistry `yaml:"schemaregistry" validate:"omitempty"`
+	Destination    KafkaCluster      `yaml:"destination"`
+	Principals     map[string]string `yaml:"principals"`
 }
 
-type Source struct {
+type KafkaCluster struct {
 	BootstrapServer string            `yaml:"bootstrapServer"`
 	ClientProps     map[string]string `yaml:"clientProps"`
 }

@@ -73,7 +73,8 @@ func buildConfig(cmd *cobra.Command) {
 func runExport(cmd *cobra.Command) {
 	output, err := cmd.Flags().GetString("output")
 	if err != nil {
-		log.Info("Error getting output flag")
+		log.Error("Error getting output flag")
+		log.Error(err)
 		os.Exit(1)
 	}
 	log.Info("Format: " + output) //TODO: Add multiple exporters to the array.
@@ -81,6 +82,7 @@ func runExport(cmd *cobra.Command) {
 	builder, err2 := services.NewExportHandler(toolsConfig)
 	if err2 != nil {
 		log.Error("Error building exporters")
+		log.Error(err)
 		os.Exit(1)
 	}
 	builder.BuildExport()

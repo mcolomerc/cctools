@@ -13,6 +13,77 @@ Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download you
 
 ## Usage
 
+### Copy
+
+Command to Copy Topics and Topic ACLs from Source Kafka Cluster to Destination Kafka Cluster.
+
+```sh
+cctools copy topics --config config.yml
+```
+
+Usage:
+
+```sh
+Command to copy from source Kafka and create destination Topics.
+
+Usage:
+  cctools copy topics [flags]
+
+Aliases:
+  topics, topic-cp, tpic-cp, tpc
+
+Flags:
+  -h, --help   help for topics
+
+Global Flags:
+  -c, --config string   config file  
+```
+
+Configuration:
+
+Source Cluster. Example with `SASL_SSL`
+
+```yaml
+source: 
+  bootstrapServer: <bootstrap_server>
+  clientProps:  
+    - ssl.ca.location: "<path>/cacerts.pem" 
+    - sasl.mechanisms: PLAIN
+    - security.protocol: SASL_SSL
+    - sasl.username: <username>
+    - sasl.password: <password>
+```
+
+Destination Cluster (Confluent Cloud example)
+
+```yaml
+destination: 
+  bootstrapServer: <bootstrap_server>.confluent.cloud:9092
+  clientProps:
+    - sasl.mechanisms: PLAIN
+    - security.protocol: SASL_SSL
+    - sasl.username: <API_KEY>
+    - sasl.password: <API_SECRET>
+```
+
+Exclude Topics:
+
+```yaml
+export:
+  topics:
+    exclude: _confluent
+```
+
+Topic ACLs - Principals Mapping
+
+All the Topic ACLs where `principal: User:test` will be created as `principal: User:sa-xyroox` on the Destination.
+
+```yaml
+principals:
+  - "test": "sa-xyroox"
+```
+
+
 ### Export
 
 Export Topics and Schemas.
