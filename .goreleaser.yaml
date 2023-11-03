@@ -22,6 +22,7 @@ builds:
     binary: cctools
     env:
     - CGO_ENABLED=1
+    - CC=aarch64-linux-gnu-gcc
     main: ./
     goos:
     - linux

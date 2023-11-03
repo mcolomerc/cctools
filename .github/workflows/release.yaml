@@ -32,7 +32,7 @@ jobs:
           cache: true 
       - name: GCC multilib
         run: |
-          sudo apt-get install gcc-multilib g++-multilib
+          sudo apt-get -y install gcc-multilib g++-multilib gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
           sudo apt install clang llvm-dev uuid-dev libssl-dev libbz2-dev libedit-dev libsqlite3-dev zlib1g-dev libxml2-dev liblzma-dev
       - name: Set up Clang
         uses: egor-tensin/setup-clang@v1
