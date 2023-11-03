@@ -24,10 +24,28 @@ builds:
       - -mod=readonly
     ldflags:
       - -s -w -X main.version={{.Version}}
+  - id: linux-amd64
+    main: ./
+    binary: cctools
+    goos:
+      - linux
+    goarch:
+      - amd64 
+    env:
+      - CGO_ENABLED=1 
+      - PKG_CONFIG_SYSROOT_DIR=/sysroot/macos/amd64
+      - PKG_CONFIG_PATH=/sysroot/macos/amd64/usr/local/lib/pkgconfig
+      - CC=x86_64-linux-gnu-gcc
+      - CXX=x86_64-linux-gnu-g++
+    flags:
+      - -mod=readonly
+    ldflags:
+      - -s -w -X main.version={{.Version}}
 archives:
   - id: cctools
     builds:
       - darwin-amd64 
+      - linux-amd64
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format: zip
     wrap_in_directory: true
