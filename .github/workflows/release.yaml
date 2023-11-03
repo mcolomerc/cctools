@@ -19,11 +19,15 @@ jobs:
         with:
           go-version: '>=1.20.3'
           cache: true 
-      - name: setup release environment
-        run: |-
-          echo 'GITHUB_TOKEN=${{secrets.GORELEASER_ACCESS_TOKEN}}' > .release-env
-      - name: release 
-        run: make release
+      - name: GCC multilib
+        run: |
+          sudo apt-get install gcc-multilib g++-multilib
+      - uses: goreleaser/goreleaser-action@v5
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro':
+          distribution: goreleaser
+          version: latest
+          args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
