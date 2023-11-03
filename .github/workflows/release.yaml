@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - main
-  pull_request:
-   types: [closed]
+  pull_request: 
+   types: [closed]  
 jobs: 
   tag:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
@@ -25,21 +25,28 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: git fetch --force --tags
       - uses: actions/setup-go@v3
         with:
           go-version: '>=1.20.3'
           cache: true 
-      - name: GCC multilib
+      - name: gcc-aarch64-linux
         run: |
-          sudo apt-get -y install gcc-multilib g++-multilib gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-          sudo apt install clang llvm-dev uuid-dev libssl-dev libbz2-dev libedit-dev libsqlite3-dev zlib1g-dev libxml2-dev liblzma-dev
+          sudo apt-get -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu 
       - name: Set up Clang
         uses: egor-tensin/setup-clang@v1
         with:
           version: latest
           platform: x64
-      - uses: goreleaser/goreleaser-action@v5
+      - uses: goreleaser/goreleaser-action@v3
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro':
+          distribution: goreleaser
+          version: latest
+          args: build --snapshot --rm-dist --skip-validate --skip-publish
+      - uses: goreleaser/goreleaser-action@v3
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro':
           distribution: goreleaser
