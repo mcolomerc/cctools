@@ -14,10 +14,10 @@ builds:
       - darwin
     goarch:
       - amd64
+    ldflags: 
+      -linkmode external -extldflags -static
     env:
       - CGO_ENABLED=1  
-      - CC=o64-clang 
-      - CXX=o64-clang++ 
   - id: linux-amd64
     binary: cctools
     env:
