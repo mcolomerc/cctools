@@ -75,6 +75,8 @@ destination:
 
 * Exclude Topics:
 
+Example exclude all '_confluent' topics.
+
 ```yaml
 export:
   topics:
