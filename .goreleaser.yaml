@@ -44,6 +44,6 @@ changelog:
 
 release:
   github:
-    owner: mcolomer
+    owner: mcolomerc
     name: cctoools
   prerelease: auto
