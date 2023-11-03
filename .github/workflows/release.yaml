@@ -39,13 +39,7 @@ jobs:
         uses: egor-tensin/setup-clang@v1
         with:
           version: latest
-          platform: x64
-      - uses: goreleaser/goreleaser-action@v3
-        with:
-          # either 'goreleaser' (default) or 'goreleaser-pro':
-          distribution: goreleaser
-          version: latest
-          args: build --snapshot --rm-dist --skip-validate --skip-publish
+          platform: x64 
       - uses: goreleaser/goreleaser-action@v3
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro':
