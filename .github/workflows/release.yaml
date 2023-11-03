@@ -8,7 +8,20 @@ on:
    types: [closed]
    
 jobs: 
+  tag:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@master
+      with:     
+        fetch-depth: 0
+    - name: Bump version and push tag
+      uses: RueLaLa/auto-tagger@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PR_NUMBER: ${{ github.event.number }}
   goreleaser: 
+    needs: [tag]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
