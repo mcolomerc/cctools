@@ -37,7 +37,7 @@ jobs:
           sudo apt-get -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu 
       - name: setup release environment
         run: |-
-          echo 'GITHUB_TOKEN=${{secrets.GORELEASER_ACCESS_TOKEN}}' > .release-env
+          echo 'GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}}' > .release-env
       - name: release publish
         run: make release
   
