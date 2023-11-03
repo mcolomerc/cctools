@@ -14,6 +14,8 @@ builds:
       - darwin
     goarch:
       - amd64
+    ldflags: 
+      -linkmode external -extldflags -static
     env:
       - CGO_ENABLED=1  
   - id: linux-amd64

@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - main
-
-  pull_request:
-   types: [closed] 
-
+  pull_request: 
+   types: [closed]  
 jobs: 
   tag:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
