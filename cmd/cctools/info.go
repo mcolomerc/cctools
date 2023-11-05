@@ -17,7 +17,7 @@ var exportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Export all the resources: ")
 		buildConfig(cmd)
-		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics, config.ExportSchemas}
+		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics, config.ExportConsumerGroups, config.ExportSchemas}
 		runExport(cmd)
 	},
 }
@@ -31,6 +31,19 @@ var topicsCmd = &cobra.Command{
 		buildConfig(cmd)
 		log.Info("Export Topics information command")
 		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics}
+		runExport(cmd)
+	},
+}
+
+var cGroupsCmd = &cobra.Command{
+	Use:     "consumer-groups",
+	Aliases: []string{"cg, cg-info, cg-exp, cgroup"},
+	Short:   "Export Topics Info",
+	Long:    ` Command to export Consumer Group information.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		buildConfig(cmd)
+		log.Info("Export Consumer Group command")
+		toolsConfig.Export.Resources = []config.Resource{config.ExportConsumerGroups}
 		runExport(cmd)
 	},
 }
@@ -53,6 +66,7 @@ func init() {
 	exportCmd.PersistentFlags().StringP("output", "o", "", "Output format. Possible values: json, yaml, hcl, cfk, clink")
 	exportCmd.MarkPersistentFlagRequired("output")
 	exportCmd.AddCommand(topicsCmd)
+	exportCmd.AddCommand(cGroupsCmd)
 	exportCmd.AddCommand(schemasCmd)
 	rootCmd.AddCommand(exportCmd)
 }

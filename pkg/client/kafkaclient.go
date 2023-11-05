@@ -350,3 +350,63 @@ func parseACLBindings(args []model.AclBinding, principals map[string]string) (ac
 	aclBindings = parsedACLBindings
 	return
 }
+
+// GetConsumerGroups returns a list of consumer groups
+func (kadmin *KafkaAdminClient) GetConsumerGroups() ([]model.ConsumerGroup, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var states []kafka.ConsumerGroupState
+	statesStr := []string{"Stable", "PreparingRebalance", "CompletingRebalance", "Empty", "Dead"}
+	for _, stateStr := range statesStr {
+		state, err := kafka.ConsumerGroupStateFromString(stateStr)
+		if err != nil {
+			log.Error("Not a valid state" + stateStr)
+		}
+		states = append(states, state)
+	}
+	listGroupRes, err := kadmin.Client.ListConsumerGroups(
+		ctx, kafka.SetAdminMatchConsumerGroupStates(states))
+
+	var cGroupsString []string
+	// build results
+	groups := listGroupRes.Valid
+	for _, group := range groups {
+		cGroupsString = append(cGroupsString, group.GroupID)
+	}
+	errs := listGroupRes.Errors
+	for _, err := range errs {
+		log.Error("Error: " + err.Error())
+	}
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+
+	var consumerGroups []model.ConsumerGroup
+
+	describeGroupsResult, err := kadmin.Client.DescribeConsumerGroups(ctx, cGroupsString,
+		kafka.SetAdminOptionIncludeAuthorizedOperations(true))
+	if err != nil {
+		log.Error("Error: " + err.Error())
+		return nil, err
+	}
+	for _, group := range describeGroupsResult.ConsumerGroupDescriptions {
+		var consumerGroup model.ConsumerGroup
+		consumerGroup.ConsumerGroupID = group.GroupID
+		consumerGroup.State = group.State.String()
+		consumerGroup.PartitionsAssignor = group.PartitionAssignor
+		for _, mem := range group.Members {
+			var consumerGroupMember model.Consumer
+			consumerGroupMember.ClientId = mem.ClientID
+			consumerGroupMember.InstanceId = mem.GroupInstanceID
+			consumerGroupMember.ConsumerId = mem.ConsumerID
+			consumerGroup.Consumers = append(consumerGroup.Consumers, consumerGroupMember)
+		}
+
+		for _, acl := range group.AuthorizedOperations {
+			log.Info(acl.String())
+		}
+		consumerGroups = append(consumerGroups, consumerGroup)
+	}
+	return consumerGroups, nil
+}

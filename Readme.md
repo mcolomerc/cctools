@@ -13,7 +13,7 @@ It provides a `copy' command to replicate resources configuration between cluste
 
 Go to [Releases](https://github.com/mcolomerc/cctools/releases) and Download your OS distribution.
 
-## Usage
+## Commands
 
 ### Copy
 
