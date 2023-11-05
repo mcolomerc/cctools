@@ -46,7 +46,7 @@ jobs:
         uses: jenkey2011/vuepress-deploy@master
         env:
          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-         TARGET_REPO: marcelogft/cctools
+         TARGET_REPO: mcolomerc/cctools
          TARGET_BRANCH: gh-pages
          BUILD_SCRIPT: yarn && yarn build
          BUILD_DIR: docs/.vuepress/dist
