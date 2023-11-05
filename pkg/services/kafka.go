@@ -136,7 +136,40 @@ func (kService *KafkaService) Export() {
 			kService.ExportTopics(exportExecutors)
 			log.Info("Topic info successfully exported to " + kService.Paths.Topics)
 		}
+		if v == config.ExportConsumerGroups {
+			kService.ExportConsumerGroups(exportExecutors)
+			log.Info("Consumer Group info successfully exported to " + kService.Paths.ConsumerGroups)
+		}
 	}
+}
+
+// Export Consumer Groups from source cluster to --output format
+func (kService *KafkaService) ExportConsumerGroups(exportExecutors []kafkaexp.KafkaExporter) {
+	log.Debug("Exporting Consumer Group Info")
+	util.BuildPath(kService.Paths.ConsumerGroups)
+	cGroupsList, err := kService.SourceClient.GetConsumerGroups()
+	if err != nil {
+		log.Error("Error getting Consumer Groups :")
+		log.Error(err)
+	}
+	done := make(chan bool, len(exportExecutors))
+	for _, expExec := range exportExecutors {
+		go func(xporter kafkaexp.KafkaExporter) {
+			pth := fmt.Sprintf("%s%s/", kService.Paths.ConsumerGroups, xporter.GetPath())
+			log.Debug("Building path :: ", pth)
+			util.BuildPath(pth)
+			err := xporter.ExportConsumerGroups(cGroupsList, pth)
+			if err != nil {
+				log.Error("Error exporting Consumer Groups :")
+				log.Error(err)
+			}
+			done <- true
+		}(expExec)
+	}
+	for i := 0; i < len(exportExecutors); i++ {
+		<-done
+	}
+	close(done)
 }
 
 // Export Topics from source cluster to --output format

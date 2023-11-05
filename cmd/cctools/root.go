@@ -31,7 +31,7 @@ One can use cctools to ...
 }
 
 func Execute() {
-	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config.yaml)")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "config file")
 	rootCmd.MarkPersistentFlagRequired("config")
 	//cobra.OnInitialize(initConfig)
 
