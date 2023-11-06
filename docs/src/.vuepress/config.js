@@ -18,6 +18,8 @@ export default {
    */
   description: description,
 
+  base: "/cctools/",
+
   /**
    * Extra tags to be injected to the page HTML `<head>`
    *
