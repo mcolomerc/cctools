@@ -2,10 +2,10 @@ package model
 
 type Topic struct {
 	Name              string        `yaml:"name" json:"name"`
-	Partitions        interface{}   `yaml:"partitions" json:"partitions"`
-	ReplicationFactor interface{}   `yaml:"replicationFactor" json:"replicationFactor"`
-	MinIsr            interface{}   `yaml:"minIsr" json:"minIsr"`
-	RetentionTime     interface{}   `yaml:"retentionTime" json:"retentionTime"`
+	Partitions        int           `yaml:"partitions" json:"partitions"`
+	ReplicationFactor int           `yaml:"replicationFactor" json:"replicationFactor"`
+	MinIsr            string        `yaml:"minIsr" json:"minIsr"`
+	RetentionTime     string        `yaml:"retentionTime" json:"retentionTime"`
 	Configs           []TopicConfig `yaml:"configs" json:"configs"`
 	RoleBindings      []RoleBinding `yaml:"roleBindings" json:"roleBindings"`
 	ACLs              []AclBinding  `yaml:"acls" json:"acls"`

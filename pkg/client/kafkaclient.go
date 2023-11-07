@@ -60,8 +60,8 @@ func (kadmin *KafkaAdminClient) CreateTopics(inputTopics []model.Topic) error {
 		}
 		destTopic := kafka.TopicSpecification{
 			Topic:             inputTopic.Name,
-			NumPartitions:     inputTopic.Partitions.(int),
-			ReplicationFactor: inputTopic.ReplicationFactor.(int),
+			NumPartitions:     inputTopic.Partitions,
+			ReplicationFactor: inputTopic.ReplicationFactor,
 			Config:            destConfigs,
 		}
 		destTopics = append(destTopics, destTopic)
