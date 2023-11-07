@@ -10,12 +10,20 @@ import (
 )
 
 var exportCmd = &cobra.Command{
-	Use:     "export",
-	Aliases: []string{"export-info, cluster-export, confluent-exp, exp"},
-	Short:   "Export Cluster Info",
-	Long:    ` Command to export cluster information.`,
+	Use:   "export",
+	Short: "Export Cluster metadata",
+	Long:  ` Command to export cluster metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Export all the resources: ")
+		//validate args
+		if len(args) > 0 {
+			if args[0] != config.ExportTopics.String() && args[0] != config.ExportConsumerGroups.String() && args[0] != config.ExportSchemas.String() {
+				log.Error("Invalid resource to export: " + args[0])
+				log.Error("Valid resources: " + config.ExportTopics.String() + ", " + config.ExportConsumerGroups.String() + ", " + config.ExportSchemas.String())
+				cmd.Help()
+				os.Exit(1)
+			}
+		}
 		buildConfig(cmd)
 		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics, config.ExportConsumerGroups, config.ExportSchemas}
 		runExport(cmd)
@@ -23,10 +31,9 @@ var exportCmd = &cobra.Command{
 }
 
 var topicsCmd = &cobra.Command{
-	Use:     "topics",
-	Aliases: []string{"topic-info, topic-exp, tpc"},
-	Short:   "Export Topics Info",
-	Long:    ` Command to export Topics information.`,
+	Use:   "topics",
+	Short: "Export Topics",
+	Long:  ` Command to export Topics metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Export Topics information command")
@@ -36,10 +43,9 @@ var topicsCmd = &cobra.Command{
 }
 
 var cGroupsCmd = &cobra.Command{
-	Use:     "consumer-groups",
-	Aliases: []string{"cg, cg-info, cg-exp, cgroup"},
-	Short:   "Export Topics Info",
-	Long:    ` Command to export Consumer Group information.`,
+	Use:   "consumer-groups",
+	Short: "Export Consumer Groups",
+	Long:  ` Command to export Consumer Group information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Export Consumer Group command")
@@ -49,10 +55,9 @@ var cGroupsCmd = &cobra.Command{
 }
 
 var schemasCmd = &cobra.Command{
-	Use:     "schemas",
-	Aliases: []string{"schemas-info, schemas-exp, schema"},
-	Short:   "Export Schemas Info",
-	Long:    ` Command to export Schemas information.`,
+	Use:   "schemas",
+	Short: "Export Schemas Info",
+	Long:  ` Command to export Schemas information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Export Schemas information command")
@@ -96,7 +101,6 @@ func runExport(cmd *cobra.Command) {
 	builder, err2 := services.NewExportHandler(toolsConfig)
 	if err2 != nil {
 		log.Error("Error building exporters")
-		log.Error(err)
 		os.Exit(1)
 	}
 	builder.BuildExport()

@@ -1,19 +1,21 @@
-# Export 
+---
+prev: ./copy.md
+next: ./import.md
+---
 
-```sh
+# Export
+
+```sh:no-line-numbers
 cctools export --help
 ```
 
-```sh
+```sh:no-line-numbers
 Command to export cluster information.
 
 Usage:
   cctools export [flags]
-  cctools export [command]
-
-Aliases:
-  export, export-info, cluster-export, confluent-exp, exp
-
+  cctools export [command] 
+  
 Available Commands:
   schemas     Export Schemas Info
   topics      Export Topics Info

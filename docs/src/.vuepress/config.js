@@ -6,6 +6,8 @@ import { nprogressPlugin } from '@vuepress/plugin-nprogress'
 import { gitPlugin } from '@vuepress/plugin-git'
 import { prismjsPlugin } from '@vuepress/plugin-prismjs'
 import { clipboardPlugin } from 'vuepress-plugin-clipboard'
+import { svgIconPlugin } from '@goy/vuepress-plugin-svg-icons'
+import { activeHeaderLinksPlugin } from '@vuepress/plugin-active-header-links'
 
 export default {
   logo: '/logo.png',
@@ -30,8 +32,13 @@ export default {
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }]
   ],
+  smoothScroll: true,
   theme: defaultTheme({
     // set config here
+    logo: '/logo.png',
+    repo: 'mcolomerc/cctools',
+    docsBranch: 'main',
+    docsDir: 'docs',
     navbar: [
       {
         text: 'Guide',
@@ -44,13 +51,8 @@ export default {
       {
         text: 'Commands',
         link: '/commands/'
-      },
-      {
-        text: 'GitHub',
-        link: 'https://github.com/mcolomerc/cctools'
       }
-    ],
-    
+    ], 
   }),
   plugins: [
     searchPlugin({
@@ -71,12 +73,11 @@ export default {
       staticIcon: true,
       align: 'top',
     }),
-  ],
-  repo: 'mcolomerc/cctools',
-  docsRepo: 'https://github.com/mcolomerc/cctools',
-  docsBranch: 'main',
-  docsDir: 'docs',
-  editLinkPattern: ':repo/-/edit/:branch/:path',
+    svgIconPlugin(),
+    activeHeaderLinksPlugin({
+      // options
+    }),
+  ], 
   themePlugins: {
     nprogresst: true,
     git: true,

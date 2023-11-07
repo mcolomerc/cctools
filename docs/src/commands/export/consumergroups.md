@@ -4,20 +4,17 @@ Consumer groups are a way of grouping Kafka consumers together to consume a topi
 
 Exporting consumer groups will generate a file per consumer group.
 
-```sh
+```sh:no-line-numbers
 cctools export consumer-groups --help
 ```
 
 Usage:
 
-```sh
+```sh:no-line-numbers
  Command to export Consumer Group information.
 
 Usage:
-  cctools export consumer-groups [flags]
-
-Aliases:
-  consumer-groups, cg, cg-info, cg-exp, cgroup
+  cctools export consumer-groups [flags] 
 
 Flags:
   -h, --help   help for consumer-groups

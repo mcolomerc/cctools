@@ -3,6 +3,8 @@ package cctools
 import (
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/log"
+	"mcolomerc/cc-tools/pkg/services"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -28,16 +30,22 @@ var importTopicsCmd = &cobra.Command{
 		buildConfig(cmd)
 		log.Info("Import Topics command")
 		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics}
-		runCopy(cmd)
+		runImport(cmd)
 	},
 }
 
 func init() {
 	// Flags
-	copyCmd.AddCommand(copyTopicsCmd)
-	rootCmd.AddCommand(copyCmd)
+	importCmd.AddCommand(importTopicsCmd)
+	rootCmd.AddCommand(importCmd)
 }
 
 func runImport(cmd *cobra.Command) {
 	log.Info("Importing ...")
+	kService, err := services.NewKafkaService(toolsConfig)
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+	kService.Import()
 }

@@ -2,26 +2,31 @@
 sidebar: auto
 ---
 
-# Commands
-
+# Commands ![GitHub release](https://img.shields.io/github/v/release/mcolomerc/cctools)
 
 
 ## Export
 
-- [Export](/commands/export.md)
+[Export](/commands/export.md)
   
-  - [Topics](/commands/export/topics.md)
+- [Topics](/commands/export/topics.md)
 
-  - Consumer Groups
+- [Consumer Groups](/commands/export/consumergroups.md)
 
-  - Schemas
+- [Schemas](/commands/export/schemas.md)
 
 ## Copy
 
-- [Copy](/commands/copy.md)
+[Copy](/commands/copy.md)
 
-  - [Topics](/commands/copy/topics.md)
+- [Topics](/commands/copy/topics.md)
 
-  - Consumer Groups
+- Consumer Groups
 
-  - Schemas
+- Schemas
+
+## Import
+
+[Import](/commands/import.md)
+
+- [Topics](/commands/import/topics.md)

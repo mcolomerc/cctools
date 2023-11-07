@@ -64,7 +64,7 @@ func (e HclExporter) ExportTopics(topics []model.Topic, outputPath string) error
 	rootBody.AppendNewline()
 	var vals []cty.Value
 	for _, topic := range topics {
-		parts := topic.Partitions.(float64)
+		parts := topic.Partitions
 		objTopic := cty.ObjectVal(map[string]cty.Value{
 			"name":       cty.StringVal(topic.Name),
 			"partitions": cty.NumberIntVal(int64(parts)),

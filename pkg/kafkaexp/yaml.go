@@ -2,6 +2,7 @@ package kafkaexp
 
 import (
 	"mcolomerc/cc-tools/pkg/export"
+	"mcolomerc/cc-tools/pkg/log"
 	"mcolomerc/cc-tools/pkg/model"
 )
 
@@ -16,8 +17,27 @@ func NewKafkaYamlExporter() *KafkaYamlExporter {
 	}
 }
 
+func (e KafkaYamlExporter) ExportTopic(topic model.Topic, outputPath string) error {
+	return e.YamlExporter.Export(topic, outputPath+"/"+topic.Name)
+}
+
 func (e KafkaYamlExporter) ExportTopics(topics []model.Topic, outputPath string) error {
-	return e.YamlExporter.Export(topics, outputPath+"topics")
+	done := make(chan bool, len(topics))
+	for _, topic := range topics {
+		go func(topic model.Topic) {
+			err := e.ExportTopic(topic, outputPath)
+			if err != nil {
+				log.Error("Error generating YAML for Topic ..." + topic.Name)
+				log.Error(err)
+			}
+			done <- true
+		}(topic)
+	}
+	for i := 0; i < len(topics); i++ {
+		<-done
+	}
+	close(done)
+	return nil
 }
 
 func (e KafkaYamlExporter) ExportConsumerGroups(cgroups []model.ConsumerGroup, outputPath string) error {

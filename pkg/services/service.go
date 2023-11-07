@@ -31,7 +31,12 @@ func NewExportHandler(conf config.Config) (*ExportHandler, error) {
 			services[KAFKA_SERVICE] = serv
 		}
 		if resource == config.ExportSchemas {
-			services[SCHEMAS_SERVICE] = NewSchemasService(conf)
+			srserv, err := NewSchemasService(conf)
+			if err != nil {
+				log.Error("Error creating Schema Registry service: " + err.Error())
+				return nil, err
+			}
+			services[SCHEMAS_SERVICE] = srserv
 		}
 	}
 

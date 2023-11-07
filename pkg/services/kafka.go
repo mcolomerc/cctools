@@ -5,8 +5,10 @@ import (
 
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/imprt"
 	"mcolomerc/cc-tools/pkg/kafkaexp"
 	"mcolomerc/cc-tools/pkg/log"
+	"mcolomerc/cc-tools/pkg/model"
 	"mcolomerc/cc-tools/pkg/util"
 )
 
@@ -101,6 +103,33 @@ func NewKafkaService(conf config.Config) (*KafkaService, error) {
 	return kafkaService, nil
 }
 
+// Manage import
+func (kService *KafkaService) Import() {
+	log.Debug("Kafka Service Importing")
+	for _, v := range kService.Conf.Export.Resources {
+		if v == config.ExportTopics {
+			kService.ImportTopics()
+		}
+	}
+}
+
+// Import Topics from source files to destination cluster
+func (kService *KafkaService) ImportTopics() {
+	log.Debug("Importing Topics")
+	importer, err := imprt.NewImporter(kService.Conf)
+	if err != nil {
+		log.Error("Error creating Importer :")
+		log.Error(err)
+	}
+	// Get Topics from source files
+	topicList, err := importer.ImportTopics()
+	if err != nil {
+		log.Error("Error getting Topics :")
+		log.Error(err)
+	}
+	kService.WriteTopics(topicList)
+}
+
 // Manage Copy
 func (kService *KafkaService) Copy() {
 	//Get Topics (configs and ACLS) from source cluster
@@ -109,21 +138,7 @@ func (kService *KafkaService) Copy() {
 		log.Error("Error reaging topics ")
 		log.Error(err)
 	}
-	// Create Topics with configs destination cluster
-	err = kService.DestClient.CreateTopics(topics)
-	if err != nil {
-		log.Error("Error writing topics ")
-		log.Error(err)
-	}
-	// Create ACLs for each topic
-	for _, topic := range topics {
-		err = kService.DestClient.SetACLs(topic.ACLs, kService.Conf.Principals)
-		if err != nil {
-			log.Error("Error writing ACLs ")
-			log.Error(err)
-		}
-	}
-
+	kService.WriteTopics(topics)
 }
 
 // Manage export
@@ -201,4 +216,22 @@ func (kService *KafkaService) ExportTopics(exportExecutors []kafkaexp.KafkaExpor
 		<-done
 	}
 	close(done)
+}
+
+func (kService *KafkaService) WriteTopics(topics []model.Topic) {
+	// Create Topics with configs destination cluster
+	err := kService.DestClient.CreateTopics(topics)
+	if err != nil {
+		log.Error("Error writing topics ")
+		log.Error(err)
+	}
+
+	// Create ACLs for each topic
+	for _, topic := range topics {
+		err = kService.DestClient.SetACLs(topic.ACLs, kService.Conf.Principals)
+		if err != nil {
+			log.Error("Error writing ACLs ")
+			log.Error(err)
+		}
+	}
 }

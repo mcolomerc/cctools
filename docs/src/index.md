@@ -14,6 +14,6 @@ features:
   details: Move configurations between clusters applying translation rules.
 
 
-footer: Made by Marcelo Colomer with ❤️
+footer: 2023 MIT Licensed 
 ---
-
+ 

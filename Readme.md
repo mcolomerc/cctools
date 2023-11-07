@@ -1,5 +1,10 @@
 
-# Confluent Migration Tools
+# Apache Kafka Migration Tools
+
+![GitHub release](https://img.shields.io/github/v/release/mcolomerc/cctools)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mcolomerc/cctools)
+![GitHub](https://img.shields.io/github/license/mcolomerc/cctools)
+ 
 
 <img src="./docs/src/.vuepress/public/logo.png" width="100"> 
 
