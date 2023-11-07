@@ -14,11 +14,8 @@ Command to export cluster information.
 
 Usage:
   cctools export [flags]
-  cctools export [command]
-
-Aliases:
-  export, export-info, cluster-export, confluent-exp, exp
-
+  cctools export [command] 
+  
 Available Commands:
   schemas     Export Schemas Info
   topics      Export Topics Info

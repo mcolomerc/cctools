@@ -14,10 +14,7 @@ Usage:
  Command to export Consumer Group information.
 
 Usage:
-  cctools export consumer-groups [flags]
-
-Aliases:
-  consumer-groups, cg, cg-info, cg-exp, cgroup
+  cctools export consumer-groups [flags] 
 
 Flags:
   -h, --help   help for consumer-groups

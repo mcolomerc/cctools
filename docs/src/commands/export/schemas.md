@@ -8,10 +8,7 @@ cctools export schemas --help
  Command to export Schemas information.
 
 Usage:
-  cctcctools export schemas [flags]
-
-Aliases:
-  schemas, schemas-info, schemas-exp, schema
+  cctcctools export schemas [flags] 
 
 Flags:
   -h, --help   help for schemas

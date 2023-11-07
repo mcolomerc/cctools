@@ -11,7 +11,7 @@ sidebar: auto
   
 - [Topics](/commands/export/topics.md)
 
-- Consumer Groups
+- [Consumer Groups](/commands/export/consumergroups.md)
 
 - [Schemas](/commands/export/schemas.md)
 

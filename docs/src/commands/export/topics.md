@@ -12,10 +12,7 @@ cctools export topics --help`
  Command to export Topics information.
 
 Usage:
-  cctools export topics [flags]
-
-Aliases:
-  topics, topic-info, topic-exp, tpc
+  cctools export topics [flags] 
 
 Flags:
   -h, --help   help for topics
