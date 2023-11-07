@@ -19,14 +19,11 @@ var rootCmd = &cobra.Command{
 	Use:     "cctools",
 	Aliases: []string{"cct-info, cct, cct-exp, cctexp"},
 	Version: version,
-	Short:   "cctools - a simple CLI to manage migrations",
-	Long: `a simple CLI to manage migrations,
-    
-One can use cctools to ...
- - Export Topics and ACls from a Kafka Source cluster to different formats (JSON,YML,CFK,HCL, ...)
- - Export Schemas and Subjects from Schema Registry to different formats (JSON,YML,CFK,HCL, ...)`,
+	Short:   "cctools - a simple CLI to manage Apache Kafka migrations",
+	Long:    `a simple CLI to manage Apache Kafka migrations`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		log.Info("Run cctools without command.")
+		cmd.Help()
 	},
 }
 
