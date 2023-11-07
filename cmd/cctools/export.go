@@ -96,7 +96,6 @@ func runExport(cmd *cobra.Command) {
 	builder, err2 := services.NewExportHandler(toolsConfig)
 	if err2 != nil {
 		log.Error("Error building exporters")
-		log.Error(err)
 		os.Exit(1)
 	}
 	builder.BuildExport()

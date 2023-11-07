@@ -29,7 +29,7 @@ const (
 	SUBJECT_PATH = "/subjects/"
 )
 
-func NewSchemasService(conf config.Config) *SchemasService {
+func NewSchemasService(conf config.Config) (*SchemasService, error) {
 	restClient := client.NewRestClient(conf.SchemaRegistry.EndpointUrl, conf.SchemaRegistry.Credentials)
 	var exporters []sregexp.SRegExporter
 	for _, v := range conf.Export.Exporters {
@@ -42,7 +42,8 @@ func NewSchemasService(conf config.Config) *SchemasService {
 		} else if v == config.Cfk {
 			exporters = append(exporters, sregexp.NewSRegCfkExporter(conf))
 		} else {
-			log.Info("Schema Registry exporter: Unrecognized exporter: ", v)
+			log.Error("Schema Registry exporter: Unrecognized exporter: " + v)
+			return nil, fmt.Errorf("Schema Registry exporter - Unrecognized exporter: %s", v)
 		}
 	}
 	paths := &SRPaths{
@@ -55,7 +56,7 @@ func NewSchemasService(conf config.Config) *SchemasService {
 		SchemaRegistryUrl: fmt.Sprintf("%s/", conf.SchemaRegistry.EndpointUrl),
 		SRegExporters:     exporters,
 		Paths:             *paths,
-	}
+	}, nil
 }
 
 func (service *SchemasService) buildExportPaths() {

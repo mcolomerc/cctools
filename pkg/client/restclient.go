@@ -9,8 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/log"
 	"net/http"
 )
 
@@ -108,7 +108,7 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 	req.Header.Set("Content-Type", "application/json;charset=utf-8")
 	res, err := kClient.Client.Do(req)
 	if err != nil {
-		log.Printf("Rest client: error making http request: %s\n", err)
+		log.Error("Rest client: error making http request: " + err.Error())
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
@@ -117,7 +117,7 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 	}
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Printf("Rest client:: could not read response body: %s\n", err)
+		log.Error("Rest client:: could not read response body: " + err.Error())
 		return nil, err
 	}
 
@@ -135,13 +135,13 @@ func getTransport(certificates config.Certificates) *http.Transport {
 	// Load client cert
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		log.Printf("Error loading cert files")
+		log.Error("Error loading cert files")
 	}
 
 	// Load CA cert
 	caCert, err := ioutil.ReadFile(caFile)
 	if err != nil {
-		log.Printf("Error reading the CA cert")
+		log.Error("Error reading the CA cert")
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
