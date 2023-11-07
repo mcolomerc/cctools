@@ -4,9 +4,7 @@ import { backToTopPlugin } from '@vuepress/plugin-back-to-top'
 import { defaultTheme } from '@vuepress/theme-default'
 import { nprogressPlugin } from '@vuepress/plugin-nprogress'
 import { gitPlugin } from '@vuepress/plugin-git'
-import { prismjsPlugin } from '@vuepress/plugin-prismjs'
-import { clipboardPlugin } from 'vuepress-plugin-clipboard'
-import { svgIconPlugin } from '@goy/vuepress-plugin-svg-icons'
+import { prismjsPlugin } from '@vuepress/plugin-prismjs' 
 import { activeHeaderLinksPlugin } from '@vuepress/plugin-active-header-links'
 
 export default {
@@ -69,11 +67,7 @@ export default {
       // options
       preloadLanguages: ['bash', 'json', 'yaml', 'properties', 'markdown', 'shell'],
     }),
-    clipboardPlugin({
-      staticIcon: true,
-      align: 'top',
-    }),
-    svgIconPlugin(),
+    
     activeHeaderLinksPlugin({
       // options
     }),
