@@ -24,12 +24,14 @@ func (e KafkaJsonExporter) ExportTopic(topic model.Topic, outputPath string) err
 func (e KafkaJsonExporter) ExportTopics(topics []model.Topic, outputPath string) error {
 	done := make(chan bool, len(topics))
 	for _, topic := range topics {
-		err := e.ExportTopic(topic, outputPath)
-		if err != nil {
-			log.Error("Error generating JSON for Topic ..." + topic.Name)
-			log.Error(err)
-		}
-		done <- true
+		go func(topic model.Topic) {
+			err := e.ExportTopic(topic, outputPath)
+			if err != nil {
+				log.Error("Error generating JSON for Topic ..." + topic.Name)
+				log.Error(err)
+			}
+			done <- true
+		}(topic)
 	}
 	for i := 0; i < len(topics); i++ {
 		<-done
