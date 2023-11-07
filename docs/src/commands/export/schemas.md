@@ -1,8 +1,10 @@
 # Export Schemas
 
-`cctools export schemas --help`
+```sh:no-line-numbers
+cctools export schemas --help
+```
 
-```sh
+```sh:no-line-numbers
  Command to export Schemas information.
 
 Usage:

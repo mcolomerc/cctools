@@ -4,11 +4,11 @@ Export Topics metadata to different formats.
 
 Includes Topic configuration and Topic ACLs.
 
-```sh
+```sh:no-line-numbers
 cctools export topics --help`
 ```
 
-```sh
+```sh:no-line-numbers
  Command to export Topics information.
 
 Usage:
@@ -62,31 +62,31 @@ Output format:
 
 * YAML:
   
-```sh
+```sh:no-line-numbers
   cctools export topics --output yaml --config config.yaml
 ```
 
 * CFK(YML):
   
-```sh
+```sh:no-line-numbers
   cctools export topics --output cfk --config config.yaml
 ```
   
 * CLINK(SH):
 
-```sh
+```sh:no-line-numbers
 cctools export topics --output clink --config config.yaml
 ```
 
 * HCL(TFVARS):
 
-```sh
+```sh:no-line-numbers
 cctools export topics --output hcl --config config.yaml
 ```
 
 ## Example
 
-```sh
+```sh:no-line-numbers
 cctools export topics --output json --config config.yaml
 ```
 

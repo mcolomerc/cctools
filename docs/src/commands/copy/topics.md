@@ -4,13 +4,13 @@ Copy Topics metadata to destination cluster.
 
 Includes Topic configuration and Topic ACLs.
 
-```sh
+```sh:no-line-numbers
 cctools copy topics --config config.yml
 ```
 
 Usage:
 
-```sh
+```sh:no-line-numbers
 Command to copy from source Kafka and create destination Topics.
 
 Usage:
