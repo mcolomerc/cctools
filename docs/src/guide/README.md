@@ -37,21 +37,23 @@ touch config.yaml
 ```
 
 - Add the Source Cluster connection configuration, the `source` tag requires:
-
+  
+- Cluster: `kafka` section contains the source Kafka cluster connection configuration.
   - `bootstrapServer`: Source Cluster bootstrap server.
   - `clientProps`: Kafka client properties map.
 
-Example for SASL_SSL (config.yaml):
+Example for SASL_SSL (*config.yaml*):
 
 ```yaml
 source: 
-  bootstrapServer: <bootstrap_server>
-  clientProps:  
-    - ssl.ca.location: "<path>/cacerts.pem" 
-    - sasl.mechanisms: PLAIN
-    - security.protocol: SASL_SSL
-    - sasl.username: <admin_user>
-    - sasl.password: <admin_password>
+  kafka:
+    bootstrapServer: <bootstrap_server>
+    clientProps:  
+      - ssl.ca.location: "<path>/cacerts.pem" 
+      - sasl.mechanisms: PLAIN
+      - security.protocol: SASL_SSL
+      - sasl.username: <admin_user>
+      - sasl.password: <admin_password>
 ```
 
 - Add the output path for the JSON files, all the Topics metadata will be exported to `<export.output.path>/topics/json`, one file per Topic.

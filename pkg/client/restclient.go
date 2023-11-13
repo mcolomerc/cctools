@@ -128,15 +128,22 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 
 // Get Transport from certificates
 func getTransport(certificates config.Certificates) *http.Transport {
-	certFile := certificates.CertFile
-	keyFile := certificates.KeyFile
-	caFile := certificates.CAFile
-
-	// Load client cert
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		log.Error("Error loading cert files")
+	var certFile string
+	var keyFile string
+	var certs []tls.Certificate
+	if certificates.CertFile != "" && certificates.KeyFile != "" {
+		log.Info("Using certificates")
+		certFile = certificates.CertFile
+		keyFile = certificates.KeyFile
+		// Load client cert
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Error("Error loading cert files")
+		}
+		certs = []tls.Certificate{cert}
 	}
+
+	caFile := certificates.CAFile
 
 	// Load CA cert
 	caCert, err := ioutil.ReadFile(caFile)
@@ -147,7 +154,7 @@ func getTransport(certificates config.Certificates) *http.Transport {
 	caCertPool.AppendCertsFromPEM(caCert)
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
+		Certificates: certs,
 		RootCAs:      caCertPool,
 	}
 	return &http.Transport{TLSClientConfig: tlsConfig}

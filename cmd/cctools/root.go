@@ -4,7 +4,6 @@ import (
 	"mcolomerc/cc-tools/pkg/config"
 	log "mcolomerc/cc-tools/pkg/log"
 
-	"mcolomerc/cc-tools/pkg/services"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -13,7 +12,6 @@ import (
 var version = "0.0.1"
 var cfgFile string
 var toolsConfig config.Config
-var exportHandler services.ExportHandler
 
 var rootCmd = &cobra.Command{
 	Use:     "cctools",

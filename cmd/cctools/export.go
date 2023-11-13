@@ -2,8 +2,8 @@ package cctools
 
 import (
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/export"
 	"mcolomerc/cc-tools/pkg/log"
-	"mcolomerc/cc-tools/pkg/services"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -17,15 +17,15 @@ var exportCmd = &cobra.Command{
 		log.Info("Export all the resources: ")
 		//validate args
 		if len(args) > 0 {
-			if args[0] != config.ExportTopics.String() && args[0] != config.ExportConsumerGroups.String() && args[0] != config.ExportSchemas.String() {
+			if args[0] != config.Topic.String() && args[0] != config.ConsumerGroup.String() && args[0] != config.Schema.String() {
 				log.Error("Invalid resource to export: " + args[0])
-				log.Error("Valid resources: " + config.ExportTopics.String() + ", " + config.ExportConsumerGroups.String() + ", " + config.ExportSchemas.String())
+				log.Error("Valid resources: " + config.Topic.String() + ", " + config.ConsumerGroup.String() + ", " + config.Schema.String())
 				cmd.Help()
 				os.Exit(1)
 			}
 		}
 		buildConfig(cmd)
-		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics, config.ExportConsumerGroups, config.ExportSchemas}
+		toolsConfig.Export.Resources = []config.Resource{config.Topic, config.ConsumerGroup, config.Schema}
 		runExport(cmd)
 	},
 }
@@ -37,7 +37,7 @@ var topicsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Export Topics information command")
-		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics}
+		toolsConfig.Export.Resources = []config.Resource{config.Topic}
 		runExport(cmd)
 	},
 }
@@ -49,7 +49,7 @@ var cGroupsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Export Consumer Group command")
-		toolsConfig.Export.Resources = []config.Resource{config.ExportConsumerGroups}
+		toolsConfig.Export.Resources = []config.Resource{config.ConsumerGroup}
 		runExport(cmd)
 	},
 }
@@ -61,7 +61,7 @@ var schemasCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Export Schemas information command")
-		toolsConfig.Export.Resources = []config.Resource{config.ExportSchemas}
+		toolsConfig.Export.Resources = []config.Resource{config.Schema}
 		runExport(cmd)
 	},
 }
@@ -98,7 +98,7 @@ func runExport(cmd *cobra.Command) {
 	}
 	log.Info("Format: " + output) //TODO: Add multiple exporters to the array.
 	toolsConfig.Export.Exporters = []config.Exporter{config.Exporter(output)}
-	builder, err2 := services.NewExportHandler(toolsConfig)
+	builder, err2 := export.NewExportHandler(toolsConfig)
 	if err2 != nil {
 		log.Error("Error building exporters")
 		os.Exit(1)

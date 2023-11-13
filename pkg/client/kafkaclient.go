@@ -18,7 +18,7 @@ type KafkaAdminClient struct {
 	Client kafka.AdminClient
 }
 
-func NewKafkaAdminClient(cfg config.KafkaCluster) (*KafkaAdminClient, error) {
+func NewKafkaAdminClient(cfg config.Kafka) (*KafkaAdminClient, error) {
 	log.Info("Using Kafka configuration: " + cfg.BootstrapServer)
 	// Create a new AdminClient.
 	config := &kafka.ConfigMap{

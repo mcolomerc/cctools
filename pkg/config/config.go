@@ -3,18 +3,22 @@ package config
 type Config struct {
 	Cluster string `yaml:"cluster"`
 	// KafkaAdmin client
-	Source KafkaCluster `yaml:"source" validate:"required"`
+	Source      Target            `yaml:"source" validate:"required"`
+	Destination Target            `yaml:"destination"`
+	Principals  map[string]string `yaml:"principals"`
 	// Getting rBAC from CC
 	CCloud `yaml:"ccloud" validate:"omitempty"`
 	// Export Configuration
 	Export `yaml:"export"`
-	// Schema Registry client
-	SchemaRegistry `yaml:"schemaregistry" validate:"omitempty"`
-	Destination    KafkaCluster      `yaml:"destination"`
-	Principals     map[string]string `yaml:"principals"`
+	Import `yaml:"import" validate:"omitempty"`
 }
 
-type KafkaCluster struct {
+type Target struct {
+	Kafka          `yaml:"kafka"`
+	SchemaRegistry `yaml:"schemaRegistry"`
+}
+
+type Kafka struct {
 	BootstrapServer string            `yaml:"bootstrapServer"`
 	ClientProps     map[string]string `yaml:"clientProps"`
 }
@@ -38,6 +42,10 @@ type Certificates struct {
 
 type CCloud struct {
 	Environment string `yaml:"environment" validate:"omitempty"`
+}
+
+type Import struct {
+	Resources []Resource `yaml:"resources"`
 }
 
 // EXPORT Configuration
@@ -96,10 +104,10 @@ const (
 type Resource string
 
 const (
-	ExportTopics         Resource = "topics"
-	ExportSchemas        Resource = "schemas"
-	ExportConsumerGroups Resource = "consumer_groups"
-	ExportAcls           Resource = "acls"
+	Topic         Resource = "topics"
+	Schema        Resource = "schemas"
+	ConsumerGroup Resource = "consumer_groups"
+	Acl           Resource = "acls"
 )
 
 func (e Resource) String() string {
