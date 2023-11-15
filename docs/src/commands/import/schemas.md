@@ -28,7 +28,7 @@ Global Flags:
   -c, --config string   config file
 ```
 
-::: info
+::: tip
 Works with JSON files. See [Export Schemas](../export/schemas.md) for more information.
 :::
 

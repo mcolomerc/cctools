@@ -24,7 +24,7 @@ Global Flags:
   -c, --config string   config file
 ```
 
-::: info
+::: tip
 Works with exported JSON files. See [Export Topics](../export/topics.md) for more information.
 :::
 

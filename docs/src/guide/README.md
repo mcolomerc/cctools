@@ -154,3 +154,12 @@ See documentation for all the [Commands](../commands/README.md)
 Usage: [Import](../commands/import.md)
 
 See documentation for all the [Commands](../commands/README.md)
+
+## DEBUG
+
+Enable Debug mode:`LOG=DEBUG` for extra logging.
+
+ ```sh:no-line-numbers
+ LOG=DEBUG cctools <command>
+ ```
+ 
