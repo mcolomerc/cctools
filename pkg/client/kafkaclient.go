@@ -285,7 +285,7 @@ func (kadmin *KafkaAdminClient) SetACLs(aclBindings []model.AclBinding, principa
 	// Print results
 	for i, result := range results {
 		if result.Error.Code() == kafka.ErrNoError {
-			log.Info("Create ACLs: successful")
+			log.Info("Create ACL: successful")
 		} else {
 			log.Error("CreateACLs %d failed, error code: %s, message: %s\n",
 				i, result.Error.Code(), result.Error.String())
@@ -298,6 +298,7 @@ func (kadmin *KafkaAdminClient) SetACLs(aclBindings []model.AclBinding, principa
 
 func parseACLBindings(args []model.AclBinding, principals map[string]string) (aclBindings kafka.ACLBindings, err error) {
 	parsedACLBindings := make(kafka.ACLBindings, len(args))
+	log.Info("Principals mapping ")
 	for i, aclBinding := range args {
 		resourceType, errParse := kafka.ResourceTypeFromString(aclBinding.ResourceType)
 		if errParse != nil {
@@ -325,17 +326,19 @@ func parseACLBindings(args []model.AclBinding, principals map[string]string) (ac
 			log.Error("Invalid permission type: %s: %v\n", aclBinding.Permission, err)
 			return
 		}
-		log.Info("Principals mapping ")
+
 		user := strings.Split(aclBinding.Principal, ":")
 		principal := aclBinding.Principal
 		if user[0] == "User" {
 			mapping, ok := principals[user[1]]
 			if ok {
 				principal = user[0] + ":" + mapping
+				log.Info("Principal mapping: " + user[1] + " -> " + principal)
 			} else {
 				principal = user[0] + ":" + user[1]
 			}
 		}
+
 		parsedACLBindings[i] = kafka.ACLBinding{
 			Type:                resourceType,
 			Name:                aclBinding.ResourceName,

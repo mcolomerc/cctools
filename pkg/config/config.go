@@ -45,6 +45,7 @@ type CCloud struct {
 }
 
 type Import struct {
+	Source    string     `yaml:"source"`
 	Resources []Resource `yaml:"resources"`
 }
 

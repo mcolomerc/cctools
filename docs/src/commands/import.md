@@ -33,3 +33,15 @@ Global Flags:
   -c, --config string   config file
 ```
 
+## Configuration
+
+Source path:
+
+```yaml
+import:
+  source: <path>
+```
+
+::: info
+The source path is `export.output` folder by default.
+:::

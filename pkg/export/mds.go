@@ -1,7 +1,6 @@
 package export
 
 import (
-	"encoding/json"
 	"fmt"
 	"mcolomerc/cc-tools/pkg/client"
 	"mcolomerc/cc-tools/pkg/config"
@@ -43,7 +42,7 @@ func (mService *MdsService) GetResourceBindings(resourceType string, resourceNam
 }
 
 func (mService *MdsService) getResourceBindingsForRole(resourceType string, resourceName string, role string) ([]model.RoleBinding, error) {
-	requestURL := mService.ClusterUrl + "lookup/role/" + role +
+	/** requestURL := mService.ClusterUrl + "lookup/role/" + role +
 		"/resource/" + resourceType + "/name/" + resourceName
 
 	clusterId := mService.Conf.Cluster
@@ -57,20 +56,20 @@ func (mService *MdsService) getResourceBindingsForRole(resourceType string, reso
 
 	request, _ := json.Marshal(requestBody)
 
-	bindings, err := mService.RestClient.Post(requestURL, request)
+	// bindings, err := mService.RestClient.Post(requestURL, request)
 
 	if err != nil {
 		fmt.Printf("client: error getting topic configs : %s\n", err)
 		return nil, err
-	}
+	} **/
 	var bindingsForTopic []model.RoleBinding
-	for _, binding := range bindings {
+	/** for _, binding := range bindings {
 		bindingForTopic := &model.RoleBinding{
 			RoleName: role,
 			Users:    binding,
 		}
 		bindingsForTopic = append(bindingsForTopic, *bindingForTopic)
-	}
+	} **/
 
 	return bindingsForTopic, nil
 }

@@ -5,6 +5,8 @@ import (
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/log"
 	"mcolomerc/cc-tools/pkg/model"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type KafkaImport struct {
@@ -26,17 +28,19 @@ const (
 
 func NewKafkaImport(conf config.Config) (*KafkaImport, error) {
 	paths := &KafkaPaths{
-		Topics:         conf.Export.Output + TOPICS_PATH,
-		ConsumerGroups: conf.Export.Output + CGROUPS_PATH,
+		Topics:         conf.Import.Source + TOPICS_PATH,
+		ConsumerGroups: conf.Import.Source + CGROUPS_PATH,
 	}
 	destClient, err := client.NewKafkaAdminClient(conf.Destination.Kafka)
 	if err != nil {
-		log.Error("Error creating Kafka Destination Client : ", err)
-		log.Error(err)
+		log.Error("Error creating Kafka Destination Client : " + err.Error())
 		return nil, err
 	}
 	imp, err := NewImporter(conf)
-
+	if err != nil {
+		log.Error("Error creating importer : " + err.Error())
+		return nil, err
+	}
 	kafkaService := &KafkaImport{
 		DestClient: *destClient,
 		Conf:       conf,
@@ -48,9 +52,11 @@ func NewKafkaImport(conf config.Config) (*KafkaImport, error) {
 }
 
 func (k *KafkaImport) Import() {
+	log.Info("Kafka service Importing ...")
 	// Import Resources
 	for _, v := range k.Conf.Import.Resources {
 		if v == config.Topic {
+			log.Info("Kafka import topics ...")
 			k.ImportTopics()
 		}
 	}
@@ -66,7 +72,15 @@ func (i *KafkaImport) ImportTopics() {
 	}
 	var topics []model.Topic
 	for _, o := range objs {
-		topics = append(topics, o.(model.Topic))
+		typed := model.Topic{}
+		cfg := &mapstructure.DecoderConfig{
+			Metadata: nil,
+			Result:   &typed,
+			TagName:  "json",
+		}
+		decoder, _ := mapstructure.NewDecoder(cfg)
+		decoder.Decode(o)
+		topics = append(topics, typed)
 	}
 	i.WriteTopics(topics)
 }

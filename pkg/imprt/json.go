@@ -2,7 +2,6 @@ package imprt
 
 import (
 	"mcolomerc/cc-tools/pkg/config"
-	"reflect"
 )
 
 type JSONImporter struct {
@@ -19,12 +18,9 @@ func NewImporter(conf config.Config) (*JSONImporter, error) {
 
 func (i *JSONImporter) Import(path string, typed interface{}) ([]interface{}, error) {
 	//Get the JSON file(s) from the source
-	path = path + "/" + string(config.Json)
-	//Create a new instance of the type
-	typedInstance := reflect.New(reflect.TypeOf(typed))
-
+	path = path + string(config.Json)
 	//Read and parse the JSON file(s)
-	elements, err := i.ResourceImporter.IteratePath(path, typedInstance)
+	elements, err := i.ResourceImporter.IteratePath(path, typed)
 	if err != nil {
 		return nil, err
 	}

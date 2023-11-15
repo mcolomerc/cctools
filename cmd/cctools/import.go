@@ -24,6 +24,7 @@ var importCmd = &cobra.Command{
 			}
 		}
 		buildConfig(cmd)
+		toolsConfig.Import.Resources = []config.Resource{config.Topic, config.Schema}
 		runCopy(cmd)
 	},
 }
@@ -35,7 +36,7 @@ var importTopicsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Import Topics command")
-		toolsConfig.Export.Resources = []config.Resource{config.Topic}
+		toolsConfig.Import.Resources = []config.Resource{config.Topic}
 		runImport(cmd)
 	},
 }
@@ -47,7 +48,7 @@ var importSchemasCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Import Schemas command")
-		toolsConfig.Export.Resources = []config.Resource{config.Schema}
+		toolsConfig.Import.Resources = []config.Resource{config.Schema}
 		runImport(cmd)
 	},
 }
@@ -55,6 +56,7 @@ var importSchemasCmd = &cobra.Command{
 func init() {
 	// Flags
 	importCmd.AddCommand(importTopicsCmd)
+	importCmd.AddCommand(importSchemasCmd)
 	rootCmd.AddCommand(importCmd)
 }
 

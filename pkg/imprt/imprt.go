@@ -20,6 +20,9 @@ const (
 )
 
 func NewImportHandler(conf config.Config) (*ImportHandler, error) {
+	if conf.Import.Source == "" {
+		conf.Import.Source = conf.Export.Output
+	}
 	services := make(map[string]ImportService)
 	for _, resource := range conf.Import.Resources {
 		if resource == config.Topic || resource == config.ConsumerGroup {
