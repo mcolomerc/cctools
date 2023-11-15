@@ -40,20 +40,39 @@ func NewRestClient(url string, credentials config.Credentials) *RestClient {
 }
 
 // POST request
-func (kClient *RestClient) Post(requestURL string, requestBody []byte) ([]interface{}, error) {
-
+func (kClient *RestClient) Post(requestURL string, requestBody []byte) (interface{}, error) {
+	log.Debug("POST requestURL: " + requestURL)
+	log.Debug(string(requestBody))
 	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(requestBody))
 	if err != nil {
+		log.Error("Error building POST: " + err.Error())
 		return nil, err
 	}
-	resp, err := kClient.buildArrayRequest(req)
+	resp, err := kClient.buildRequest(req)
 	if err != nil {
+		log.Error("Error building POST: " + err.Error())
 		return nil, err
 	}
 
 	return resp, nil
 }
 
+// PUT request
+func (kClient *RestClient) Put(requestURL string, requestBody []byte) (interface{}, error) {
+	log.Debug("PUT requestURL: " + requestURL)
+	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Error("Error building PUT: " + err.Error())
+		return nil, err
+	}
+	resp, err := kClient.buildRequest(req)
+	if err != nil {
+		log.Error("Error building PUT: " + err.Error())
+		return nil, err
+	}
+
+	return resp, nil
+}
 func (kClient *RestClient) Get(requestURL string) (interface{}, error) {
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
@@ -116,6 +135,7 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 		return nil, errors.New(errorString)
 	}
 	resBody, err := ioutil.ReadAll(res.Body)
+	log.Debug(string(resBody))
 	if err != nil {
 		log.Error("Rest client:: could not read response body: " + err.Error())
 		return nil, err
@@ -128,15 +148,22 @@ func (kClient *RestClient) build(req *http.Request) (interface{}, error) {
 
 // Get Transport from certificates
 func getTransport(certificates config.Certificates) *http.Transport {
-	certFile := certificates.CertFile
-	keyFile := certificates.KeyFile
-	caFile := certificates.CAFile
-
-	// Load client cert
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		log.Error("Error loading cert files")
+	var certFile string
+	var keyFile string
+	var certs []tls.Certificate
+	if certificates.CertFile != "" && certificates.KeyFile != "" {
+		log.Info("Using certificates")
+		certFile = certificates.CertFile
+		keyFile = certificates.KeyFile
+		// Load client cert
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Error("Error loading cert files")
+		}
+		certs = []tls.Certificate{cert}
 	}
+
+	caFile := certificates.CAFile
 
 	// Load CA cert
 	caCert, err := ioutil.ReadFile(caFile)
@@ -147,7 +174,7 @@ func getTransport(certificates config.Certificates) *http.Transport {
 	caCertPool.AppendCertsFromPEM(caCert)
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
+		Certificates: certs,
 		RootCAs:      caCertPool,
 	}
 	return &http.Transport{TLSClientConfig: tlsConfig}

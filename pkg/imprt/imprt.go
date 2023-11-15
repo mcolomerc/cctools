@@ -1,61 +1,63 @@
 package imprt
 
 import (
-	"encoding/json"
-
 	"mcolomerc/cc-tools/pkg/config"
 	"mcolomerc/cc-tools/pkg/log"
-	"mcolomerc/cc-tools/pkg/model"
-	"os"
 )
 
-type Importer interface {
-	ImportTopics() ([]model.Topic, error)
+type ImportService interface {
+	Import()
 }
 
-type JSONImporter struct {
-	Importer Importer
-	Config   config.Config
+type ImportHandler struct {
+	Services map[string]ImportService
 }
 
-func NewImporter(conf config.Config) (Importer, error) {
-	return &JSONImporter{
-		Config: conf,
+const (
+	KAFKA_SERVICE   = "kafka"
+	SCHEMAS_SERVICE = "schemas"
+	GIT_SERVICE     = "git"
+)
+
+func NewImportHandler(conf config.Config) (*ImportHandler, error) {
+	if conf.Import.Source == "" {
+		conf.Import.Source = conf.Export.Output
+	}
+	services := make(map[string]ImportService)
+	for _, resource := range conf.Import.Resources {
+		if resource == config.Topic || resource == config.ConsumerGroup {
+			serv, err := NewKafkaImport(conf)
+			if err != nil {
+				log.Error("Error creating Kafka service: ", err)
+				return nil, err
+			}
+			services[KAFKA_SERVICE] = serv
+		}
+		if resource == config.Schema {
+			srserv, err := NewSchemaImport(conf)
+			if err != nil {
+				log.Error("Error creating Schema Registry service: " + err.Error())
+				return nil, err
+			}
+			services[SCHEMAS_SERVICE] = srserv
+		}
+	}
+
+	return &ImportHandler{
+		Services: services,
 	}, nil
 }
 
-func (i *JSONImporter) ImportTopics() ([]model.Topic, error) {
-	//Get the JSON file(s) from the source
-	path := i.Config.Export.Output + "/" + string(config.ExportTopics) + "/" + string(config.Json)
-	//Read the JSON file(s)
-	topics, err := iterate(path)
-	if err != nil {
-		return nil, err
+func (exp *ImportHandler) Import() {
+	done := make(chan bool, len(exp.Services))
+	for _, v := range exp.Services {
+		go func(s ImportService) {
+			s.Import()
+			done <- true
+		}(v)
 	}
-	//For each file under the path
-	return topics, nil
-}
-
-func iterate(path string) ([]model.Topic, error) {
-	var topics []model.Topic
-	files, err := os.ReadDir(path)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
+	for i := 0; i < len(exp.Services); i++ {
+		<-done
 	}
-	for _, file := range files {
-		topic := model.Topic{}
-		log.Info("Reading file: " + path + "/" + file.Name())
-		content, err := os.ReadFile(path + "/" + file.Name())
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-		err = json.Unmarshal([]byte(content), &topic)
-		if err != nil {
-			return nil, err
-		}
-		topics = append(topics, topic)
-	}
-	return topics, nil
+	close(done)
 }

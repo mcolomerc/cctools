@@ -2,8 +2,8 @@ package cctools
 
 import (
 	"mcolomerc/cc-tools/pkg/config"
+	"mcolomerc/cc-tools/pkg/copy"
 	"mcolomerc/cc-tools/pkg/log"
-	"mcolomerc/cc-tools/pkg/services"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -16,6 +16,15 @@ var copyCmd = &cobra.Command{
 	Long:    ` Command to copy cluster resources  to another cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Copy all the resources: ")
+		//validate args
+		if len(args) > 0 {
+			if args[0] != config.Topic.String() {
+				log.Error("Invalid resource to export: " + args[0])
+				log.Error("Valid resources: " + config.Topic.String())
+				cmd.Help()
+				os.Exit(1)
+			}
+		}
 		buildConfig(cmd)
 		runCopy(cmd)
 	},
@@ -29,7 +38,7 @@ var copyTopicsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		buildConfig(cmd)
 		log.Info("Copy Topics command")
-		toolsConfig.Export.Resources = []config.Resource{config.ExportTopics}
+		toolsConfig.Export.Resources = []config.Resource{config.Topic}
 		runCopy(cmd)
 	},
 }
@@ -41,7 +50,7 @@ func init() {
 }
 
 func runCopy(cmd *cobra.Command) {
-	kService, err := services.NewKafkaService(toolsConfig)
+	kService, err := copy.NewCopyHandler(toolsConfig)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)

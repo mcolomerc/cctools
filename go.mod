@@ -1,10 +1,11 @@
 module mcolomerc/cc-tools
 
-go 1.18
+go 1.23
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
 	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/cobra v1.6.0
 	github.com/zclconf/go-cty v1.12.1
 	golang.org/x/exp v0.0.0-20221109134031-9ce248df8de5
@@ -32,7 +33,6 @@ require (
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect

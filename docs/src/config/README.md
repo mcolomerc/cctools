@@ -6,7 +6,9 @@
 
 `export` and `copy` commands require a source cluster connection configuration.
 
-`source` section contains the source cluster connection configuration.
+`source` section contains the source connection configuration.
+
+`kafka` section contains the source Kafka cluster connection configuration.
 
 - `bootstrapServer`: Source Cluster bootstrap server.
 - `clientProps`: Kafka client properties map.
@@ -15,13 +17,14 @@ Example with `SASL_SSL`
 
 ```yaml
 source: 
-  bootstrapServer: <bootstrap_server>
-  clientProps:  
-    - ssl.ca.location: "<path>/cacerts.pem" 
-    - sasl.mechanisms: PLAIN
-    - security.protocol: SASL_SSL
-    - sasl.username: <username>
-    - sasl.password: <password>
+  kafka:
+    bootstrapServer: <bootstrap_server>
+    clientProps:  
+      - ssl.ca.location: "<path>/cacerts.pem" 
+      - sasl.mechanisms: PLAIN
+      - security.protocol: SASL_SSL
+      - sasl.username: <username>
+      - sasl.password: <password>
 ```
 
 ## Destination Cluster
@@ -30,24 +33,47 @@ Some commands like `copy` or `import`, require a destination cluster connection 
 
 ```yaml
 destination: 
-  bootstrapServer: <bootstrap_server>.confluent.cloud:9092
-  clientProps:
-    - sasl.mechanisms: PLAIN
-    - security.protocol: SASL_SSL
-    - sasl.username: <API_KEY>
-    - sasl.password: <API_SECRET>
+  kafka:
+    bootstrapServer: <bootstrap_server>.confluent.cloud:9092
+    clientProps:
+      - sasl.mechanisms: PLAIN
+      - security.protocol: SASL_SSL
+      - sasl.username: <API_KEY>
+      - sasl.password: <API_SECRET>
 ```
 
 ## Schema Registry
 
-Required. Source Schema Registry connection configuration:
+Source Schema Registry connection configuration:
 
 ```yaml
-schemaRegistry: 
-  endpointUrl: <Schema_Registry_Url>
-  credentials: 
-    key: <USER> # or CCloud API_KEY 
-    secret: <PASSWORD> # or CCloud API_SECRET   
+source:
+  schemaRegistry: 
+    endpointUrl: <Schema_Registry_Url>
+    credentials: 
+      key: <USER> # or CCloud API_KEY 
+      secret: <PASSWORD> # or CCloud API_SECRET   
+```
+
+### TLS
+
+**certFile**: Certificate file path
+
+**keyFile**: Key file path
+
+**CAFile**: CA file path
+
+```yaml
+source:
+  schemaRegistry: 
+    endpointUrl: <Schema_Registry_Url> 
+    credentials: 
+      key: <USER>  
+      secret: <PASSWORD>  
+    certificates: 
+      certFile: <CERT file path>  
+      keyFile: <KEY file path>  
+      CAFile: <CA File path>
 ```
 
 ## Exporters configuration
@@ -78,7 +104,7 @@ principals:
   - "test": "sa-xyroox"
 ```
 
-## Schemas
+### Schemas
 
 Configure Subject export: `all` subject versions or only the `latest` version.
 
@@ -90,7 +116,7 @@ export:
       version: latest # default: all 
 ```
 
-## External resources
+### External resources
 
 Add external Git repositories to the `output`.
 
@@ -112,7 +138,7 @@ In the example above:
 
 - The `https://github.com/mcolomerc/terraform-confluent-topics` repository will be cloned into `output/terraform`
 
-## Confluent For Kubernetes
+### Confluent For Kubernetes
 
 Configuration requires:
 
@@ -128,7 +154,7 @@ export:
     schemaRegistryClusterRef: schemaregistry 
 ```
 
-## Cluster Linking commands
+### Cluster Linking commands
 
 Configuration requires:
 
@@ -150,6 +176,6 @@ export:
       acl: true | false
 ```
 
-## Terraform exporter
+### Terraform exporter
 
 Export resources to HCL format (*tfvars*) in order to be used as Terraform inputs.
