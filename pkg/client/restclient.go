@@ -162,7 +162,7 @@ func getTransport(certificates config.Certificates) *http.Transport {
 		}
 		certs = []tls.Certificate{cert}
 	}
-
+	log.Debug(len(certs))
 	caFile := certificates.CAFile
 
 	// Load CA cert
@@ -170,12 +170,18 @@ func getTransport(certificates config.Certificates) *http.Transport {
 	if err != nil {
 		log.Error("Error reading the CA cert")
 	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
+	// Get the SystemCertPool, continue with an empty pool on error
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	rootCAs.AppendCertsFromPEM(caCert)
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{
-		Certificates: certs,
-		RootCAs:      caCertPool,
+		//Certificates:       certs,
+		InsecureSkipVerify: true,
+		RootCAs:            rootCAs,
 	}
 	return &http.Transport{TLSClientConfig: tlsConfig}
 
