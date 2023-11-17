@@ -51,7 +51,23 @@ func NewKafkaCopy(conf config.Config) (*KafkaCopy, error) {
 
 func (k *KafkaCopy) Copy() {
 	// Copy Topics
-	// k.copyTopics()
+	k.CopyTopics()
 	// Copy Consumer Groups
 	// k.copyConsumerGroups()
+}
+
+func (k *KafkaCopy) CopyTopics() {
+	// Get Topics from Source
+	topics, err := k.SourceClient.GetTopics(k.Conf.Export.Topics.Exclude)
+	if err != nil {
+		log.Error("Error getting topics from source cluster: ", err)
+		return
+	}
+	if len(topics) > 0 {
+		err = k.DestClient.CreateTopics(topics)
+		if err != nil {
+			log.Error("Error writing topics to destination cluster: ", err)
+			return
+		}
+	}
 }
