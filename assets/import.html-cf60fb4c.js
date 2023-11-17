@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-138687e8","path":"/guide/import.html","title":"Import Topics","lang":"en-US","frontmatter":{},"headers":[],"filePathRelative":"guide/import.md","git":{"createdTime":1700234389000,"updatedTime":1700234389000,"contributors":[{"name":"Marcelo Colomer","email":"mcolomercornejo@confluent.io","commits":1}]}}');export{e as data};
